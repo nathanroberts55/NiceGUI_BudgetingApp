@@ -1,33 +1,15 @@
-INCOME_TABLE_COLUMNS = [
-    {"name": "date", "label": "Date", "field": "date", "sortable": True},
+TRANSACTION_COLUMNS = [
     {
-        "name": "source",
-        "label": "Income Source",
-        "field": "source",
-        "required": True,
-        "align": "left",
-    },
-    {
-        "name": "amount",
-        "label": "Amount",
-        "field": "amount",
-        "sortable": True,
-        ":format": 'value => "$" + value',
-    },
-]
-
-EXPENSE_TABLE_COLUMNS = [
-    {
-        "name": "date",
+        "name": "transaction_date",
         "label": "Date",
-        "field": "date",
-        "required": True,
+        "field": "transaction_date",
         "sortable": True,
+        "align": "left",
     },
     {
-        "name": "source",
-        "label": "Expense Source",
-        "field": "source",
+        "name": "name",
+        "label": "Name",
+        "field": "name",
         "required": True,
         "align": "left",
     },
@@ -35,7 +17,6 @@ EXPENSE_TABLE_COLUMNS = [
         "name": "amount",
         "label": "Amount",
         "field": "amount",
-        "required": True,
         "sortable": True,
         ":format": 'value => "$" + value',
     },

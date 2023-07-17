@@ -1,9 +1,7 @@
 from nicegui import app, ui
 import os
 from datetime import datetime
-
-# from database.db import get_transaction_data
-from components import expense, income, transaction
+from components import expense, income, transaction, budget, category
 import plotly.graph_objects as go
 from database.db import initialize_database, create_sample_data
 
@@ -54,29 +52,23 @@ ui.dark_mode().enable()
 
 with ui.tabs().classes("w-full") as tabs:
     data_entry = ui.tab("Data Entry", icon="note_add").classes("w-40")
+    data_report = ui.tab("Data Reporting", icon="table_view").classes("w-40")
     data_viz = (
         ui.tab("Data Visualization", icon="insights")
         # .on("blur", update_data)
         .classes("w-40")
     )
-with ui.tab_panels(tabs, value=data_entry).classes("w-full"):
+with ui.tab_panels(tabs, value=data_report).classes("w-full"):
     with ui.tab_panel(data_entry):
         with ui.row().classes("w-full"):
             income.income_entry()
             expense.expense_entry()
 
+    with ui.tab_panel(data_report):
+        budget.budget_breakdown()
+        category.transactions_tables_by_category()
+
     with ui.tab_panel(data_viz):
-        # transaction_tables.transactions_tables()
-        ui.splitter(horizontal=True).classes("my-10")
-        # Budget Visualizations
-        # Get the data as a dataframe
-        # transaction_data = get_transaction_data()
-        # UI Components
-        # ui.label("Budget Visualizations").classes("text-semibold text-3xl my-5")
-        # with ui.row():
-        # plot = ui.plotly(transaction_chart).classes("w-full h-100")
-        # update_data()
-        # ui.button('Update', on_click=update_data)
-        # ui.splitter(horizontal=True).classes("my-10")
+        ui.label("Data Visualizations Coming Soon!")
 
 ui.run(title="Budgeting App")

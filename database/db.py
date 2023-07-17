@@ -2,16 +2,12 @@ from nicegui import ui
 import pandas as pd
 from typing import List
 from datetime import datetime
-from utils import okay, warn, error
+from utils import okay, warn, error, generate_random_float
 from sqlmodel import SQLModel, Session, create_engine, select
-from database.models import (
-    Budget,
-    Category,
-    DebtCategory,
-    SavingCategory,
-    CategoryItem,
-    Transaction,
-)
+from .budget_model import Budget
+from .category_model import Category
+from .catergory_items_model import CategoryItem
+from .transactions_model import Transaction
 
 sqlite_file_name = "budget.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
@@ -28,7 +24,7 @@ def initialize_database() -> None:
 def create_sample_data() -> None:
     with session:
         okay("Creating Budget Record")
-        budget = Budget()
+        budget = Budget(name="My First Budget")
         session.add(budget)
         okay("Saving Budget Record")
         session.commit()
@@ -84,11 +80,19 @@ def create_sample_data() -> None:
         warn("Category | Saving ID:", saving_id)
 
         okay("Creating Category Items")
-        job_income = CategoryItem(name="Uber Paycheck", category_id=income_id)
-        rent = CategoryItem(name="Rent", category_id=expense_id)
-        groceries = CategoryItem(name="Groceries", category_id=expense_id)
-        credit_card = CategoryItem(name="Chase Credit Card", category_id=debt_id)
-        credit_union = CategoryItem(name="Mission FCU", category_id=saving_id)
+        job_income = CategoryItem(
+            name="Uber Paycheck", budgeted="1500.00", category_id=income_id
+        )
+        rent = CategoryItem(name="Rent", budgeted="800.00", category_id=expense_id)
+        groceries = CategoryItem(
+            name="Groceries", budgeted="300.00", category_id=expense_id
+        )
+        credit_card = CategoryItem(
+            name="Chase Credit Card", budgeted="300.00", category_id=debt_id
+        )
+        credit_union = CategoryItem(
+            name="Mission FCU", budgeted="500.00", category_id=saving_id
+        )
 
         session.add(job_income)
         session.add(rent)
@@ -137,6 +141,22 @@ def create_sample_data() -> None:
         warn("CategoryItem | Chase Credit Card ID:", credit_card_id)
         warn("CategoryItem | Mission FCU ID:", credit_union_id)
 
+        # Creating some sample transactions
+        for transaction in range(0, 45):
+            cat_item_id = (transaction % 5) + 1
+            okay("Creating New Transaction, #", transaction)
+            Transaction.add(
+                session=session,
+                name=f"Test Source: {transaction}",
+                transaction_date=datetime.now().strftime("%m/%d/%y"),
+                amount=generate_random_float(),
+                category_item_id=cat_item_id,
+            )
+            okay("Saving New Transaction, #", transaction)
+            session.commit()
+            okay("Saved New Transaction, #", transaction)
+        okay("All Transactions Created!")
+
 
 def get_all_budgets() -> List[Budget]:
     """Function that queries the database and returns all the Budgets.
@@ -144,9 +164,29 @@ def get_all_budgets() -> List[Budget]:
         List of Budgets
     """
     with session:
-        budget = session.execute(select(Budget)).all()
+        budget = session.exec(select(Budget)).all()
 
     return budget
+
+
+def get_budget_with_related_data(budget_id: int) -> Budget:
+    """
+    This function takes a budget_id as an argument and returns a Budget object with its related data.
+    :param budget_id: The id of the budget to retrieve.
+    :return: A Budget object with its related data.
+    """
+    with session:
+        # Get the budget with the given id
+        budget = session.get(Budget, budget_id)
+        # Access the categories relationship attribute to get the related categories
+        categories = budget.categories
+        for category in categories:
+            # Access the category_items relationship attribute to get the related category items
+            category_items = category.category_items
+            for category_item in category_items:
+                # Access the transactions relationship attribute to get the related transactions
+                transactions = category_item.transactions
+        return budget
 
 
 def get_all_categories() -> List[Category]:
@@ -155,9 +195,26 @@ def get_all_categories() -> List[Category]:
         List of Categories
     """
     with session:
-        category = session.execute(select(Category)).all()
+        category = session.exec(select(Category)).all()
 
     return category
+
+
+def get_category_with_related_data(category_id: int) -> Category:
+    """
+    This function takes a category_id as an argument and returns a Category object with its related data.
+    :param category_id: The id of the Category to retrieve.
+    :return: A Category object with its related data.
+    """
+    with session:
+        # Get the category with the given id
+        category = session.get(Category, category_id)
+        # Access the categories relationship attribute to get the related category items
+        category_items = category.category_items
+        for category_item in category_items:
+            # Access the transactions relationship attribute to get the related transactions
+            transactions = category_item.transactions
+        return category
 
 
 def get_all_category_items() -> List[CategoryItem]:
@@ -166,9 +223,23 @@ def get_all_category_items() -> List[CategoryItem]:
         List of CategoryItems
     """
     with session:
-        category_items = session.execute(select(CategoryItem)).all()
+        category_items = session.exec(select(CategoryItem)).all()
 
     return category_items
+
+
+def get_category_items_with_related_data(category_item_id: int) -> CategoryItem:
+    """
+    This function takes a category_item_id as an argument and returns a CategoryItem object with its related data.
+    :param category_item_id: The id of the CategoryItem to retrieve.
+    :return: A CategoryItem object with its related data.
+    """
+    with session:
+        # Get the category_item with the given id
+        category_item = session.get(CategoryItem, category_item_id)
+        # Access the transactions relationship attribute to get the related trnasactions
+        transactions = category_item.transactions
+        return category_item
 
 
 def get_all_transactions() -> List[Transaction]:
@@ -177,7 +248,7 @@ def get_all_transactions() -> List[Transaction]:
         List of Transactions
     """
     with session:
-        transactions = session.execute(select(Transaction)).all()
+        transactions = session.exec(select(Transaction)).all()
 
     return transactions
 
