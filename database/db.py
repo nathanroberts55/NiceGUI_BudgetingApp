@@ -189,6 +189,20 @@ def get_budget_with_related_data(budget_id: int) -> Budget:
         return budget
 
 
+def get_budget_by_name(budget_name) -> Budget:
+    """_summary_
+
+    Args:
+        budget_name (str): name of the Budget to be searched for
+
+    Returns:
+        Budget: First Budget object returned from database
+    """
+    with session:
+        budget = session.exec(select(Budget).where(Budget.name == budget_name)).first()
+    return budget
+
+
 def get_all_categories() -> List[Category]:
     """Function that queries the database and returns all the Categories.
     Returns:
@@ -262,6 +276,40 @@ def get_transaction_data() -> pd.DataFrame | None:
     """
 
     return None
+
+
+def save_budget(budget_name) -> None:
+    """When the Budget form is submitted, create a transaction and commit to the database
+
+    Args:
+        budget_name (ui.button):
+    """
+
+    with session:
+        Budget.add(
+            session=session,
+            name=budget_name.value,
+        )
+        session.commit()
+
+    ui.notify(f"{budget_name.value} Saved!")
+
+
+def save_category_item(budget_name) -> None:
+    """When the Budget form is submitted, create a transaction and commit to the database
+
+    Args:
+        budget_name (ui.button):
+    """
+
+    with session:
+        Budget.add(
+            session=session,
+            name=budget_name.value,
+        )
+        session.commit()
+
+    ui.notify(f"{budget_name.value} Saved!")
 
 
 def save_income(income_date, income_source, income_amount) -> None:
