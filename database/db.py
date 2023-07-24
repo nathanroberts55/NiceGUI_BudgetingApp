@@ -21,6 +21,12 @@ def initialize_database() -> None:
     SQLModel.metadata.create_all(engine)
 
 
+def initialize_budget() -> None:
+    budget = Budget(name="My First Budget")
+    session.add(budget)
+    session.commit()
+
+
 def create_sample_data() -> None:
     with session:
         okay("Creating Budget Record")
@@ -81,7 +87,7 @@ def create_sample_data() -> None:
 
         okay("Creating Category Items")
         job_income = CategoryItem(
-            name="Uber Paycheck", budgeted="1500.00", category_id=income_id
+            name="Uber Paycheck", budgeted="4500.00", category_id=income_id
         )
         rent = CategoryItem(name="Rent", budgeted="800.00", category_id=expense_id)
         groceries = CategoryItem(
@@ -278,7 +284,7 @@ def get_transaction_data() -> pd.DataFrame | None:
     return None
 
 
-def save_budget(budget_name) -> None:
+def save_budget(budget_name: ui.input) -> None:
     """When the Budget form is submitted, create a transaction and commit to the database
 
     Args:
@@ -286,16 +292,24 @@ def save_budget(budget_name) -> None:
     """
 
     with session:
-        Budget.add(
+        budget: Budget = Budget.create(
             session=session,
             name=budget_name.value,
         )
+        Category.add(session=session, name="Income", budget_id=budget.id)
+        Category.add(session=session, name="Expense", budget_id=budget.id)
+        Category.add(session=session, name="Spending", budget_id=budget.id)
+        Category.add(session=session, name="Debt", budget_id=budget.id)
+        Category.add(session=session, name="Saving", budget_id=budget.id)
+
         session.commit()
 
     ui.notify(f"{budget_name.value} Saved!")
 
 
-def save_category_item(budget_name) -> None:
+def save_category_item(
+    name: ui.input, budget: Budget, category_name: ui.select, budgeted_amount: ui.number
+) -> None:
     """When the Budget form is submitted, create a transaction and commit to the database
 
     Args:
@@ -303,13 +317,20 @@ def save_category_item(budget_name) -> None:
     """
 
     with session:
-        Budget.add(
+        CategoryItem.add(
             session=session,
-            name=budget_name.value,
+            budget=budget.id,
+            category_id=[
+                category
+                for category in budget.categories
+                if category.name == category_name.value
+            ][0].id,
+            name=name.value,
+            budgeted=budgeted_amount.value,
         )
         session.commit()
 
-    ui.notify(f"{budget_name.value} Saved!")
+    ui.notify(f"{name.value} Saved!")
 
 
 def save_income(income_date, income_source, income_amount) -> None:

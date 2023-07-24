@@ -26,7 +26,7 @@ def budget_breakdown() -> None:
         for category_item in category.category_items:
             with ui.grid(columns=3):
                 ui.label(category_item.name).classes("text-semibold ml-20")
-                ui.label(category_item.budgeted)
+                ui.label("{:.2f}".format(float(category_item.budgeted)))
                 ui.label("{:.2f}".format(category_item.actual))
         with ui.grid(columns=3):
             ui.label("TOTAL").classes("text-bold ml-20")
