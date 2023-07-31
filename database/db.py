@@ -22,9 +22,18 @@ def initialize_database() -> None:
 
 
 def initialize_budget() -> None:
-    budget = Budget(name="My First Budget")
-    session.add(budget)
-    session.commit()
+    # Current Date to be used in the default Budget Name
+    current_date = datetime.now().strftime("%m/%d/%Y")
+
+    # Create a Budget
+    budget: Budget = Budget.create(name=f"Budget | {current_date}")
+
+    # Create the default categories
+    income: Category = Category.create(name="Income", budget_id=budget.id)
+    expense: Category = Category.create(name="Expense", budget_id=budget.id)
+    spending: Category = Category.create(name="Spending", budget_id=budget.id)
+    debt: Category = Category.create(name="Debt", budget_id=budget.id)
+    saving: Category = Category.create(name="Saving", budget_id=budget.id)
 
 
 def create_sample_data() -> None:
