@@ -1,4 +1,5 @@
 from nicegui import ui
+from utils import enable_next
 from database.db import (
     get_budget_with_related_data,
     save_category_item,
@@ -10,10 +11,6 @@ item_name: ui.input = None
 item_budget: ui.number = None
 save_button: ui.button = None
 budget = None
-
-
-def enable_next(ui_element) -> None:
-    return ui_element.enable()
 
 
 @ui.refreshable

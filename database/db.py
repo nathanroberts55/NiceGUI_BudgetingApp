@@ -1,7 +1,7 @@
 from nicegui import ui
 import pandas as pd
 from typing import List
-from datetime import datetime
+from datetime import datetime, timedelta
 from utils import okay, warn, error, generate_random_float
 from sqlmodel import SQLModel, Session, create_engine, select
 from .budget_model import Budget
@@ -385,3 +385,56 @@ def save_expense(expense_date, expense_source, expense_amount) -> None:
         session.commit()
 
     ui.notify(f"{expense_source.value} Saved!")
+
+
+def create_recurring_transactions(
+    frequency: str, start_date: str, end_date: str, days_of_month: list
+):
+    """
+    Create recurring transaction records in a database.
+
+    :param frequency: The frequency of the recurring transactions. Options are "Weekly", "Bi-Weekly", "Monthly", "Twice a Month", and "Annually".
+    :param start_date: The start date for the recurring transactions in the format 'YYYY-MM-DD'.
+    :param end_date: The end date for the recurring transactions in the format 'YYYY-MM-DD'.
+    :param days_of_month: A list of integers representing the days of the month on which a transaction may occur.
+    """
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
+    current_date = start
+    last_transaction_date = None
+    while current_date <= end:
+        if frequency == "Weekly" and current_date.day in days_of_month:
+            if (
+                last_transaction_date is None
+                or (current_date - last_transaction_date).days >= 7
+            ):
+                # Create new record in database for current_date
+                last_transaction_date = current_date
+        elif frequency == "Bi-Weekly" and current_date.day in days_of_month:
+            if (
+                last_transaction_date is None
+                or (current_date - last_transaction_date).days >= 14
+            ):
+                # Create new record in database for current_date
+                last_transaction_date = current_date
+        elif frequency == "Monthly" and current_date.day in days_of_month:
+            if (
+                last_transaction_date is None
+                or (current_date - last_transaction_date).days >= 28
+            ):
+                # Create new record in database for current_date
+                last_transaction_date = current_date
+        elif frequency == "Twice a Month" and current_date.day in days_of_month:
+            if last_transaction_date is None or (
+                current_date.month != last_transaction_date.month
+            ):
+                # Create new record in database for current_date
+                last_transaction_date = current_date
+        elif frequency == "Annually" and current_date.day in days_of_month:
+            if (
+                last_transaction_date is None
+                or (current_date - last_transaction_date).days >= 364
+            ):
+                # Create new record in database for current_date
+                last_transaction_date = current_date
+        current_date += timedelta(days=1)

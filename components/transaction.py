@@ -1,11 +1,9 @@
 from nicegui import ui
-from utils import to_dict
+from utils import to_dict, enable_next
 from database.db import get_all_transactions, get_budget_with_related_data
-from constants import TRANSACTION_COLUMNS
+from constants import TRANSACTION_COLUMNS, RECURRING_OPTIONS
 
-
-def enable_next(ui_element) -> None:
-    return ui_element.enable()
+category_select: ui.select = None
 
 
 @ui.refreshable
@@ -27,7 +25,7 @@ def transactions_tables() -> None:
 
 @ui.refreshable
 def create_transaction_form() -> None:
-    global category_select, item_name, item_budget
+    global category_select
     budget = get_budget_with_related_data(1)
 
     with ui.card().classes("w-3/4 mx-auto my-10") as container:
@@ -44,8 +42,9 @@ def create_transaction_form() -> None:
                 on_change=lambda: enable_next(transaction_date),
             ).classes("w-3/4 m-auto")
 
+            # Transaction Date
             ui.label("Transaction Date:").classes("text-xl m-auto")
-            with ui.input("Income Date").classes("w-3/4 m-auto").on(
+            with ui.input("Transaction Date").classes("w-3/4 m-auto").on(
                 "blur", lambda: enable_next(transaction_amount)
             ) as transaction_date:
                 with ui.menu() as menu:
@@ -71,6 +70,59 @@ def create_transaction_form() -> None:
                 )
             )
             transaction_amount.disable()
+
+            # transaction_recuring = ui.switch("Recuring Transaction").classes(
+            #     "w-3/4 text-xl m-auto"
+            # )
+            # transaction_recurring_frequency = (
+            #     ui.select(
+            #         RECURRING_OPTIONS, label="Frequency", value=RECURRING_OPTIONS[0]
+            #     )
+            #     .bind_visibility_from(transaction_recuring, "value")
+            #     .classes("w-3/4 m-auto")
+            # )
+
+            # # Reccuring Start Date
+            # ui.label("Start Date:").classes("text-xl m-auto").bind_visibility_from(
+            #     transaction_recuring, "value"
+            # )
+            # with ui.input("Start Date").classes("w-3/4 m-auto").on(
+            #     "blur", lambda: enable_next(transaction_amount)
+            # ).bind_visibility_from(
+            #     transaction_recuring, "value"
+            # ) as recurring_start_date:
+            #     with ui.menu() as menu:
+            #         ui.date().bind_value(recurring_start_date)
+            #     with recurring_start_date.add_slot("append"):
+            #         ui.icon("edit_calendar").on("click", menu.open).classes(
+            #             "cursor-pointer"
+            #         )
+
+            # # Reccuring End Date
+            # ui.label("End Date:").classes("text-xl m-auto").bind_visibility_from(
+            #     transaction_recuring, "value"
+            # )
+            # with ui.input("End Date").classes("w-3/4 m-auto").on(
+            #     "blur", lambda: enable_next(transaction_amount)
+            # ).bind_visibility_from(transaction_recuring, "value") as transaction_date:
+            #     with ui.menu() as menu:
+            #         ui.date().bind_value(transaction_date)
+            #     with transaction_date.add_slot("append"):
+            #         ui.icon("edit_calendar").on("click", menu.open).classes(
+            #             "cursor-pointer"
+            #         )
+
+            # ui.label("Recurring Dates").bind_visibility_from(
+            #     transaction_recuring, "value"
+            # ).classes("text-xl m-auto")
+            # transaction_recurring_dates = (
+            #     ui.select(
+            #         [day for day in range(1, 32)], multiple=True, value=1, label="Day"
+            #     )
+            #     .bind_visibility_from(transaction_recuring, "value")
+            #     .props("use-chips")
+            #     .classes("m-auto w-3/4")
+            # )
 
             ui.label()
             save_button = ui.button(
