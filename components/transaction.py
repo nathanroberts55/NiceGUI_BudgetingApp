@@ -1,9 +1,13 @@
 from nicegui import ui
 from utils import to_dict, enable_next
-from database.db import get_all_transactions, get_budget_with_related_data
+from database.db import (
+    get_all_transactions,
+    get_budget_with_related_data,
+    save_transaction,
+)
 from constants import TRANSACTION_COLUMNS, RECURRING_OPTIONS
 
-category_select: ui.select = None
+category_item_select: ui.select = None
 
 
 @ui.refreshable
@@ -32,15 +36,22 @@ def create_transaction_form() -> None:
         ui.label("Create Transaction").classes("text-semibold text-3xl")
         with ui.grid(columns=2).classes("w-full") as form:
             ui.label("Select a Category Item:").classes("text-xl m-auto")
-            category_select = ui.select(
+            category_item_select = ui.select(
                 [
                     category_item.name
                     for category in budget.categories
                     for category_item in category.category_items
                 ],
                 value="Select a Category",
+                on_change=lambda: enable_next(transaction_name),
+            ).classes("w-3/4 m-auto")
+
+            ui.label("Transaction Name:").classes("text-xl m-auto")
+            transaction_name = ui.input(
+                placeholder="Example: Taco Bell",
                 on_change=lambda: enable_next(transaction_date),
             ).classes("w-3/4 m-auto")
+            transaction_name.disable()
 
             # Transaction Date
             ui.label("Transaction Date:").classes("text-xl m-auto")
@@ -71,6 +82,7 @@ def create_transaction_form() -> None:
             )
             transaction_amount.disable()
 
+            # region Recurring Transaction
             # transaction_recuring = ui.switch("Recuring Transaction").classes(
             #     "w-3/4 text-xl m-auto"
             # )
@@ -123,16 +135,17 @@ def create_transaction_form() -> None:
             #     .props("use-chips")
             #     .classes("m-auto w-3/4")
             # )
+            # endregion Recurring Transaction
 
             ui.label()
             save_button = ui.button(
                 "Save",
                 on_click=lambda: (
                     save_transaction(
-                        name=item_name,
-                        budget=budget,
-                        category_name=category_select,
-                        budgeted_amount=item_budget,
+                        name=transaction_name,
+                        transaction_date=transaction_date,
+                        category_item_name=category_item_select,
+                        amount=transaction_amount,
                     ),
                     create_transaction_form.refresh(),
                 ),

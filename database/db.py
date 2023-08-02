@@ -319,7 +319,7 @@ def save_budget(budget_name: ui.input) -> None:
 def save_category_item(
     name: ui.input, budget: Budget, category_name: ui.select, budgeted_amount: ui.number
 ) -> None:
-    """When the Budget form is submitted, create a transaction and commit to the database
+    """When the Category Item form is submitted, create a Category Item and commit to the database
 
     Args:
         budget_name (ui.button):
@@ -336,6 +336,38 @@ def save_category_item(
             ][0].id,
             name=name.value,
             budgeted=budgeted_amount.value,
+        )
+        session.commit()
+
+    ui.notify(f"{name.value} Saved!")
+
+
+def save_transaction(
+    name: ui.input,
+    transaction_date: ui.input,
+    category_item_name: ui.select,
+    amount: ui.number,
+) -> None:
+    """Function to save transaction to the database
+
+    Args:
+        name (ui.input): string name of the transaction
+        transaction_date (ui.input): string representation of when the transaction occured
+        category_item_name (ui.select): name of the category item that the transaction is under
+        amount (ui.number): ztring representation of the dollar amount of the transaction
+    """
+
+    with session:
+        category_item: CategoryItem = session.exec(
+            select(CategoryItem).where(CategoryItem.name == category_item_name.value)
+        ).first()
+
+        Transaction.add(
+            session=session,
+            name=name.value,
+            transaction_date=transaction_date.value,
+            category_item_id=category_item.id,
+            amount=amount.value,
         )
         session.commit()
 
