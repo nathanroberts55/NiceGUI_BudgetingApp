@@ -5,10 +5,6 @@ from constants import RECURRING_OPTIONS
 
 @ui.refreshable
 def expense_entry() -> None:
-    # _, expense_transactions = get_transactions()
-    # expense_autocomplete_options = [
-    #     transaction.source for transaction in expense_transactions
-    # ]
     with ui.column().classes("w-1/2"):
         ui.label("Expense Entry").classes("text-semibold text-3xl my-5")
         with ui.input("Expense Date") as expense_date:

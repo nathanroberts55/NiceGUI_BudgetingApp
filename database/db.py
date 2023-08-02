@@ -1,7 +1,7 @@
 from nicegui import ui
 import pandas as pd
 from typing import List
-from datetime import datetime
+from datetime import datetime, timedelta
 from utils import okay, warn, error, generate_random_float
 from sqlmodel import SQLModel, Session, create_engine, select
 from .budget_model import Budget
@@ -22,9 +22,18 @@ def initialize_database() -> None:
 
 
 def initialize_budget() -> None:
-    budget = Budget(name="My First Budget")
-    session.add(budget)
-    session.commit()
+    # Current Date to be used in the default Budget Name
+    current_date = datetime.now().strftime("%m/%d/%Y")
+
+    # Create a Budget
+    budget: Budget = Budget.create(name=f"Budget | {current_date}")
+
+    # Create the default categories
+    income: Category = Category.create(name="Income", budget_id=budget.id)
+    expense: Category = Category.create(name="Expense", budget_id=budget.id)
+    spending: Category = Category.create(name="Spending", budget_id=budget.id)
+    debt: Category = Category.create(name="Debt", budget_id=budget.id)
+    saving: Category = Category.create(name="Saving", budget_id=budget.id)
 
 
 def create_sample_data() -> None:
@@ -310,7 +319,7 @@ def save_budget(budget_name: ui.input) -> None:
 def save_category_item(
     name: ui.input, budget: Budget, category_name: ui.select, budgeted_amount: ui.number
 ) -> None:
-    """When the Budget form is submitted, create a transaction and commit to the database
+    """When the Category Item form is submitted, create a Category Item and commit to the database
 
     Args:
         budget_name (ui.button):
@@ -327,6 +336,38 @@ def save_category_item(
             ][0].id,
             name=name.value,
             budgeted=budgeted_amount.value,
+        )
+        session.commit()
+
+    ui.notify(f"{name.value} Saved!")
+
+
+def save_transaction(
+    name: ui.input,
+    transaction_date: ui.input,
+    category_item_name: ui.select,
+    amount: ui.number,
+) -> None:
+    """Function to save transaction to the database
+
+    Args:
+        name (ui.input): string name of the transaction
+        transaction_date (ui.input): string representation of when the transaction occured
+        category_item_name (ui.select): name of the category item that the transaction is under
+        amount (ui.number): ztring representation of the dollar amount of the transaction
+    """
+
+    with session:
+        category_item: CategoryItem = session.exec(
+            select(CategoryItem).where(CategoryItem.name == category_item_name.value)
+        ).first()
+
+        Transaction.add(
+            session=session,
+            name=name.value,
+            transaction_date=transaction_date.value,
+            category_item_id=category_item.id,
+            amount=amount.value,
         )
         session.commit()
 
@@ -376,3 +417,56 @@ def save_expense(expense_date, expense_source, expense_amount) -> None:
         session.commit()
 
     ui.notify(f"{expense_source.value} Saved!")
+
+
+def create_recurring_transactions(
+    frequency: str, start_date: str, end_date: str, days_of_month: list
+):
+    """
+    Create recurring transaction records in a database.
+
+    :param frequency: The frequency of the recurring transactions. Options are "Weekly", "Bi-Weekly", "Monthly", "Twice a Month", and "Annually".
+    :param start_date: The start date for the recurring transactions in the format 'YYYY-MM-DD'.
+    :param end_date: The end date for the recurring transactions in the format 'YYYY-MM-DD'.
+    :param days_of_month: A list of integers representing the days of the month on which a transaction may occur.
+    """
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
+    current_date = start
+    last_transaction_date = None
+    while current_date <= end:
+        if frequency == "Weekly" and current_date.day in days_of_month:
+            if (
+                last_transaction_date is None
+                or (current_date - last_transaction_date).days >= 7
+            ):
+                # Create new record in database for current_date
+                last_transaction_date = current_date
+        elif frequency == "Bi-Weekly" and current_date.day in days_of_month:
+            if (
+                last_transaction_date is None
+                or (current_date - last_transaction_date).days >= 14
+            ):
+                # Create new record in database for current_date
+                last_transaction_date = current_date
+        elif frequency == "Monthly" and current_date.day in days_of_month:
+            if (
+                last_transaction_date is None
+                or (current_date - last_transaction_date).days >= 28
+            ):
+                # Create new record in database for current_date
+                last_transaction_date = current_date
+        elif frequency == "Twice a Month" and current_date.day in days_of_month:
+            if last_transaction_date is None or (
+                current_date.month != last_transaction_date.month
+            ):
+                # Create new record in database for current_date
+                last_transaction_date = current_date
+        elif frequency == "Annually" and current_date.day in days_of_month:
+            if (
+                last_transaction_date is None
+                or (current_date - last_transaction_date).days >= 364
+            ):
+                # Create new record in database for current_date
+                last_transaction_date = current_date
+        current_date += timedelta(days=1)

@@ -27,6 +27,7 @@ with ui.tab_panels(tabs, value=budget_planning).classes("w-full"):
     with ui.tab_panel(budget_planning):
         # budget.create_budget_form()
         category_item.create_category_item_form()
+        transaction.create_transaction_form()
 
     with ui.tab_panel(budget_entry):
         with ui.row().classes("w-full"):

@@ -23,3 +23,7 @@ def to_dict(objects):
     for obj in objects:
         dicts.append(dict(obj))
     return dicts
+
+
+def enable_next(ui_element) -> None:
+    return ui_element.enable()

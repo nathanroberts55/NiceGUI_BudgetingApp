@@ -22,4 +22,4 @@ TRANSACTION_COLUMNS = [
     },
 ]
 
-RECURRING_OPTIONS = ["Weekly", "Bi-Weekly", "Monthly", "Twice a Month"]
+RECURRING_OPTIONS = ["Weekly", "Bi-Weekly", "Monthly", "Twice a Month", "Annually"]

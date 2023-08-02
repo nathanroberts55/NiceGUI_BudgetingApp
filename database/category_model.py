@@ -53,6 +53,15 @@ class Category(SQLModel, table=True):
         session.add(category)
         return category
 
+    # Define a class method to save the new object to the database
+    @classmethod
+    def create(cls, session: Session, **kwargs) -> "Category":
+        category = cls(**kwargs)
+        session.add(category)
+        session.commit()
+        category = session.refresh()
+        return category
+
 
 # region Future Feature
 class DebtCategory(Category):
