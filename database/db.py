@@ -2,8 +2,8 @@ from nicegui import ui
 import pandas as pd
 from typing import List
 from datetime import datetime, timedelta
-from utils import okay, warn, error, generate_random_float
-from sqlmodel import SQLModel, Session, create_engine, select
+from utils import okay, warn, error, generate_random_float, parse_date
+from sqlmodel import SQLModel, Session, create_engine, select, cast, DateTime
 from .budget_model import Budget
 from .category_model import Category
 from .catergory_items_model import CategoryItem
@@ -204,6 +204,41 @@ def get_budget_with_related_data(budget_id: int) -> Budget:
         return budget
 
 
+def get_budget_data_by_date(budget_id: int, start_date: str, end_date: str) -> Budget:
+    """
+    Retrieves a Budget object with the given budget_id from the database and filters its transactions to only include those with a transaction_date between start_date and end_date.
+
+    :param budget_id: The id of the budget to retrieve from the database.
+    :type budget_id: int
+    :param start_date: The start date of the date range to filter transactions by.
+    :type start_date: str
+    :param end_date: The end date of the date range to filter transactions by.
+    :type end_date: str
+    :return: A Budget object with filtered transactions.
+    :rtype: Budget
+    """
+
+    with session:
+        # Get the budget with the given id
+        budget = session.get(Budget, budget_id)
+        # Access the categories relationship attribute to get the related categories
+        categories = budget.categories
+        for category in categories:
+            # Access the category_items relationship attribute to get the related category items
+            category_items = category.category_items
+            for category_item in category_items:
+                # Access the transactions relationship attribute to get the related transactions
+                statement = select(Transaction).where(
+                    Transaction.category_item_id == category_item.id,
+                    Transaction.transaction_date >= start_date,
+                    Transaction.transaction_date <= end_date,
+                )
+                result = session.exec(statement)
+                transactions = result.all()
+                category_item.transactions = transactions
+        return budget
+
+
 def get_budget_by_name(budget_name) -> Budget:
     """_summary_
 
@@ -243,6 +278,32 @@ def get_category_with_related_data(category_id: int) -> Category:
         for category_item in category_items:
             # Access the transactions relationship attribute to get the related transactions
             transactions = category_item.transactions
+        return category
+
+
+def get_category_data_by_date(
+    category_id: int, start_date: str, end_date: str
+) -> Category:
+    """
+    This function takes a category_id as an argument and returns a Category object with its related data.
+    :param category_id: The id of the Category to retrieve.
+    :return: A Category object with its related data.
+    """
+    with session:
+        # Get the category with the given id
+        category = session.get(Category, category_id)
+        # Access the categories relationship attribute to get the related category items
+        category_items = category.category_items
+        for category_item in category_items:
+            # Access the transactions relationship attribute to get the related transactions
+            statement = select(Transaction).where(
+                Transaction.category_item_id == category_item.id,
+                Transaction.transaction_date >= start_date,
+                Transaction.transaction_date <= end_date,
+            )
+            result = session.exec(statement)
+            transactions = result.all()
+            category_item.transactions = transactions
         return category
 
 
@@ -365,7 +426,7 @@ def save_transaction(
         Transaction.add(
             session=session,
             name=name.value,
-            transaction_date=transaction_date.value,
+            transaction_date=transaction_date.value.strftime("%m/%d/%y"),
             category_item_id=category_item.id,
             amount=amount.value,
         )

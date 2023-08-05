@@ -1,5 +1,7 @@
 from nicegui import ui
-from database.db import get_all_budgets, get_budget_with_related_data, save_budget
+from utils import get_current_month
+from components import state
+from database.db import get_all_budgets, get_budget_data_by_date, save_budget
 
 
 @ui.refreshable
@@ -17,8 +19,11 @@ def create_budget_form() -> None:
             ).classes("w-1/2 mx-auto")
 
 
+@ui.refreshable
 def budget_breakdown() -> None:
-    budget = get_budget_with_related_data(1)
+    budget = get_budget_data_by_date(
+        1, start_date=state.reporting_start_date, end_date=state.reporting_end_date
+    )
     ui.label(budget.name).classes("text-semibold text-3xl my-5")
     ui.splitter(horizontal=True)
     for category in budget.categories:
