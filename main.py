@@ -1,7 +1,15 @@
 from nicegui import app, ui
 import os
 from datetime import datetime
-from components import expense, income, transaction, budget, category, category_item
+from components import (
+    expense,
+    income,
+    transaction,
+    budget,
+    category,
+    category_item,
+    common,
+)
 import plotly.graph_objects as go
 from database.db import initialize_database, create_sample_data
 
@@ -23,18 +31,18 @@ with ui.tabs().classes("w-full") as tabs:
         # .on("blur", update_data)
         .classes("w-40")
     )
-with ui.tab_panels(tabs, value=budget_planning).classes("w-full"):
+with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
     with ui.tab_panel(budget_planning):
-        # budget.create_budget_form()
         category_item.create_category_item_form()
-        transaction.create_transaction_form()
 
     with ui.tab_panel(budget_entry):
         with ui.row().classes("w-full"):
-            income.income_entry()
-            expense.expense_entry()
+            # income.income_entry()
+            # expense.expense_entry()
+            transaction.create_transaction_form()
 
     with ui.tab_panel(budget_report):
+        common.budget_date_select()
         budget.budget_breakdown()
         category.transactions_tables_by_category()
 
