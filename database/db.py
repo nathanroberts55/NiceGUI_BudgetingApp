@@ -1,5 +1,6 @@
 from nicegui import ui
 import pandas as pd
+import random
 from typing import List
 from datetime import datetime, timedelta
 from utils import okay, warn, error, generate_random_float, parse_date
@@ -157,13 +158,25 @@ def create_sample_data() -> None:
         warn("CategoryItem | Mission FCU ID:", credit_union_id)
 
         # Creating some sample transactions
-        for transaction in range(0, 45):
+        for transaction in range(0, 100):
+            # Get the current date
+            today = datetime.now()
+
+            # Define the range of days to choose from
+            days_range = 365
+
+            # Generate a random number of days within the range
+            random_days = random.randint(0, days_range)
+
+            # Subtract the random number of days from today to get a random date before today
+            random_date = today - timedelta(days=random_days)
+
             cat_item_id = (transaction % 5) + 1
             okay("Creating New Transaction, #", transaction)
             Transaction.add(
                 session=session,
                 name=f"Test Source: {transaction}",
-                transaction_date=datetime.now().strftime("%m/%d/%y"),
+                transaction_date=random_date.strftime("%m/%d/%y"),
                 amount=generate_random_float(),
                 category_item_id=cat_item_id,
             )
