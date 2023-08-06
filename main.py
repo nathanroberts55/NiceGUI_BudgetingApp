@@ -34,12 +34,12 @@ with ui.tabs().classes("w-full") as tabs:
 with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
     with ui.tab_panel(budget_planning):
         category_item.create_category_item_form()
-        transaction.create_transaction_form()
 
     with ui.tab_panel(budget_entry):
         with ui.row().classes("w-full"):
-            income.income_entry()
-            expense.expense_entry()
+            # income.income_entry()
+            # expense.expense_entry()
+            transaction.create_transaction_form()
 
     with ui.tab_panel(budget_report):
         common.budget_date_select()
