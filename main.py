@@ -49,4 +49,4 @@ with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
     with ui.tab_panel(budget_viz):
         ui.label("Data Visualizations Coming Soon!")
 
-ui.run(title="Budgeting App")
+ui.run(title="Budgeting App", favicon="assets\\budgeting.png")
