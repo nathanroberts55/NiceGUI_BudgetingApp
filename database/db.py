@@ -439,7 +439,7 @@ def save_transaction(
         Transaction.add(
             session=session,
             name=name.value,
-            transaction_date=transaction_date.value.strftime("%m/%d/%y"),
+            transaction_date=transaction_date.value,
             category_item_id=category_item.id,
             amount=amount.value,
         )

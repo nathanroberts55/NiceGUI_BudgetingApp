@@ -59,7 +59,7 @@ def create_transaction_form() -> None:
                 "blur", lambda: enable_next(transaction_amount)
             ) as transaction_date:
                 with ui.menu() as menu:
-                    ui.date().bind_value(transaction_date)
+                    ui.date(mask="MM/DD/YY").bind_value(transaction_date)
                 with transaction_date.add_slot("append"):
                     ui.icon("edit_calendar").on("click", menu.open).classes(
                         "cursor-pointer"
