@@ -2,8 +2,6 @@ from nicegui import app, ui
 import os
 from datetime import datetime
 from components import (
-    expense,
-    income,
     transaction,
     budget,
     category,

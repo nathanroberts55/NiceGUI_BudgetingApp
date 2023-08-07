@@ -448,51 +448,6 @@ def save_transaction(
     ui.notify(f"{name.value} Saved!")
 
 
-def save_income(income_date, income_source, income_amount) -> None:
-    """When the Income form is submitted, create a transaction and commit to the database
-
-    Args:
-        income_date (datetime.datetime): Date the Transaction was posted
-        income_source (str): Name of the Transaction
-        income_amount (str): Amount of the Transaction
-    """
-    date = datetime.strptime(income_date.value, "%Y-%m-%d")
-
-    with session:
-        Transaction.add(
-            session=session,
-            name=income_source,
-            date=date.strftime("%m/%d/%y"),
-            amount=income_amount,
-        )
-        session.commit()
-
-    ui.notify(f"{income_source.value} Saved!")
-
-
-def save_expense(expense_date, expense_source, expense_amount) -> None:
-    """When the Income form is submitted, create a transaction and commit to the database
-
-    Args:
-        expense_date (datetime.datetime): Date the Transaction was posted
-        expense_source (str): Name of the Transaction
-        expense_amount (str): Amount of the Transaction
-    """
-    date = datetime.strptime(expense_date.value, "%Y-%m-%d")
-
-    expense = Transaction(
-        name=expense_source,
-        date=date.strftime("%m/%d/%y"),
-        amount=expense_amount,
-    )
-
-    with session:
-        session.add(expense)
-        session.commit()
-
-    ui.notify(f"{expense_source.value} Saved!")
-
-
 def create_recurring_transactions(
     frequency: str, start_date: str, end_date: str, days_of_month: list
 ):
