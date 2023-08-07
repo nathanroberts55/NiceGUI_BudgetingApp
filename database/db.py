@@ -393,9 +393,15 @@ def save_budget(budget_name: ui.input) -> None:
 def save_category_item(
     name: ui.input, budget: Budget, category_name: ui.select, budgeted_amount: ui.number
 ) -> None:
-    """When the Category Item form is submitted, create a Category Item and commit to the database
+    """Saves a new category item to the database.
+
+    This method is called when the Category Item form is submitted. It creates a new Category Item and commits it to the database.
 
     Args:
+        name (ui.input): The name of the new category item.
+        budget (Budget): The budget object associated with the new category item.
+        category_name (ui.select): The name of the category associated with the new category item.
+        budgeted_amount (ui.number): The budgeted amount for the new category item.
         budget_name (ui.button):
     """
 
