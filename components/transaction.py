@@ -3,8 +3,10 @@ from utils import to_dict, enable_next
 from database.db import (
     get_all_transactions,
     get_budget_with_related_data,
+    get_transactions_by_date,
     save_transaction,
 )
+from components import state
 from constants import TRANSACTION_COLUMNS, RECURRING_OPTIONS
 
 category_item_select: ui.select = None
@@ -151,3 +153,32 @@ def create_transaction_form() -> None:
                 ),
             ).classes("w-1/2 mx-auto")
             save_button.disable()
+
+
+@ui.refreshable
+def transaction_grid() -> None:
+    transactions = get_transactions_by_date(
+        start_date=state.reporting_start_date, end_date=state.reporting_end_date
+    )
+    transactions_list = to_dict(transactions)
+
+    ui.label("Transaction Table").classes("text-2xl mt-6 mb-2")
+    grid = ui.aggrid(
+        {
+            "defaultColDef": {"flex": 1},
+            "columnDefs": [
+                {"headerName": "ID", "field": "id", "hide": True},
+                {"headerName": "Created", "field": "created", "hide": True},
+                {"headerName": "Updated", "field": "updated", "hide": True},
+                {"headerName": "Date", "field": "transaction_date"},
+                {"headerName": "Name", "field": "name"},
+                {
+                    "headerName": "Amount",
+                    "field": "amount",
+                    "valueFormatter": "'$' + value",
+                },
+            ],
+            "rowData": transactions_list,
+            "rowSelection": "single",
+        }
+    ).classes("max-h-80")

@@ -42,7 +42,8 @@ with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
     with ui.tab_panel(budget_report):
         common.budget_date_select()
         budget.budget_breakdown()
-        category.transactions_tables_by_category()
+        # category.transactions_tables_by_category()
+        transaction.transaction_grid()
 
     with ui.tab_panel(budget_viz):
         ui.label("Data Visualizations Coming Soon!")

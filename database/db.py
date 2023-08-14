@@ -356,6 +356,31 @@ def get_all_transactions() -> List[Transaction]:
     return transactions
 
 
+def get_transactions_by_date(start_date: str, end_date: str) -> Budget:
+    """
+    Retrieves a Budget object with the given budget_id from the database and filters its transactions to only include those with a transaction_date between start_date and end_date.
+
+    :param budget_id: The id of the budget to retrieve from the database.
+    :type budget_id: int
+    :param start_date: The start date of the date range to filter transactions by.
+    :type start_date: str
+    :param end_date: The end date of the date range to filter transactions by.
+    :type end_date: str
+    :return: A Budget object with filtered transactions.
+    :rtype: Budget
+    """
+
+    with session:
+        # Access the transactions relationship attribute to get the related transactions
+        statement = select(Transaction).where(
+            Transaction.transaction_date >= start_date,
+            Transaction.transaction_date <= end_date,
+        )
+        result = session.exec(statement)
+        transactions = result.all()
+        return transactions
+
+
 # Data Visualization
 def get_transaction_data() -> pd.DataFrame | None:
     """_summary_
