@@ -4,12 +4,107 @@ from database.db import (
     get_all_transactions,
     get_budget_with_related_data,
     get_transactions_by_date,
+    get_all_category_items,
     save_transaction,
 )
 from components import state
 from constants import TRANSACTION_COLUMNS, RECURRING_OPTIONS
 
 category_item_select: ui.select = None
+grid: ui.aggrid = None
+
+
+def add_transaction() -> None:
+    pass
+
+
+def update_transaction() -> None:
+    pass
+
+
+def delete_transaction() -> None:
+    pass
+
+
+def open_add_dialog() -> None:
+    # Open the Add Transaction dialog
+    add_dialog.open()
+
+
+async def open_edit_dialog() -> None:
+    state.selected_row = await grid.get_selected_row()
+
+    if not state.selected_row:
+        ui.notify("No Row Selected. Please select and try again.", color="Red")
+        return
+
+    edit_category_item.set_value(state.selected_row["category_item_id"])
+    edit_transaction_name.set_value(state.selected_row["name"])
+    edit_transaction_date.set_value(state.selected_row["transaction_date"])
+    edit_transaction_amount.set_value(state.selected_row["amount"])
+
+    edit_dialog.open()
+
+
+with ui.dialog() as add_dialog:
+    with ui.card():
+        category_items = get_all_category_items()
+        add_category_item = ui.select(
+            [category_item.name for category_item in category_items],
+            value="Select a Category",
+        ).classes("w-full")
+        add_transaction_name = ui.input(
+            placeholder="Example: Taco Bell",
+        ).classes("w-full")
+        with ui.input("Transaction Date").classes(
+            "w-full m-auto"
+        ) as add_transaction_date:
+            with ui.menu() as menu:
+                ui.date(mask="MM/DD/YY").bind_value(add_transaction_date)
+            with add_transaction_date.add_slot("append"):
+                ui.icon("edit_calendar").on("click", menu.open).classes(
+                    "cursor-pointer"
+                )
+        add_transaction_amount = (
+            ui.number(
+                placeholder="Example: 400.00",
+                format="%.2f",
+            )
+            .classes("w-full m-auto")
+            .on(
+                "blur",
+                lambda: add_transaction_amount.update(),
+            )
+        )
+        ui.button("Save New Transaction", on_click=add_transaction).classes("m-auto")
+
+with ui.dialog() as edit_dialog:
+    with ui.card():
+        category_items = get_all_category_items()
+        edit_category_item = ui.select(
+            [category_item.name for category_item in category_items],
+        ).classes("w-full")
+        edit_transaction_name = ui.input().classes("w-full")
+        with ui.input("Transaction Date").classes(
+            "w-full m-auto"
+        ) as edit_transaction_date:
+            with ui.menu() as menu:
+                ui.date(mask="MM/DD/YY").bind_value(edit_transaction_date)
+            with edit_transaction_date.add_slot("append"):
+                ui.icon("edit_calendar").on("click", menu.open).classes(
+                    "cursor-pointer"
+                )
+        edit_transaction_amount = (
+            ui.number(
+                format="%.2f",
+            )
+            .classes("w-full m-auto")
+            .on(
+                "blur",
+                lambda: edit_transaction_amount.update(),
+            )
+        )
+        ui.button("Edit Transaction", on_click=update_transaction).classes("m-auto")
 
 
 @ui.refreshable
@@ -157,6 +252,7 @@ def create_transaction_form() -> None:
 
 @ui.refreshable
 def transaction_grid() -> None:
+    global grid
     transactions = get_transactions_by_date(
         start_date=state.reporting_start_date, end_date=state.reporting_end_date
     )
@@ -182,3 +278,8 @@ def transaction_grid() -> None:
             "rowSelection": "single",
         }
     ).classes("max-h-80")
+
+    with ui.row().classes("mt-4"):
+        ui.button("Add", color="Green", on_click=open_add_dialog)
+        ui.button("Edit", on_click=open_edit_dialog)
+        ui.button("Delete", color="Red")
