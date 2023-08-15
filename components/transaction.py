@@ -5,6 +5,9 @@ from database.db import (
     get_budget_with_related_data,
     get_transactions_by_date,
     get_all_category_items,
+    get_category_item_by_id,
+    get_transaction_by_id,
+    delete_transaction_by_id,
     save_transaction,
 )
 from components import state
@@ -15,15 +18,42 @@ grid: ui.aggrid = None
 
 
 def add_transaction() -> None:
-    pass
+    # TODO: Create Transaction Here
+
+    add_dialog.close()
+
+    ui.notify("Successfully Saved Transaction", color="Green")
 
 
 def update_transaction() -> None:
-    pass
+    # TODO: Update Transaction Here
+
+    edit_dialog.close()
+
+    ui.notify("Successfully Updated Transaction")
 
 
-def delete_transaction() -> None:
-    pass
+async def delete_transaction() -> None:
+    row = await grid.get_selected_row()
+
+    if not row:
+        ui.notify("No Row Selected. Please select and try again.", color="Red")
+        return
+
+    delete_transaction_by_id(row["id"])
+
+    grid.options["rowData"] = sorted(
+        to_dict(
+            get_transactions_by_date(
+                start_date=state.reporting_start_date, end_date=state.reporting_end_date
+            )
+        ),
+        key=lambda data: data["transaction_date"],
+    )
+
+    grid.update()
+
+    ui.notify("Successfully Deleted Transaction", color="Red")
 
 
 def open_add_dialog() -> None:
@@ -38,7 +68,9 @@ async def open_edit_dialog() -> None:
         ui.notify("No Row Selected. Please select and try again.", color="Red")
         return
 
-    edit_category_item.set_value(state.selected_row["category_item_id"])
+    category_item = get_category_item_by_id(state.selected_row["category_item_id"])
+
+    edit_category_item.set_value(category_item.name)
     edit_transaction_name.set_value(state.selected_row["name"])
     edit_transaction_date.set_value(state.selected_row["transaction_date"])
     edit_transaction_amount.set_value(state.selected_row["amount"])
@@ -264,6 +296,7 @@ def transaction_grid() -> None:
             "defaultColDef": {"flex": 1},
             "columnDefs": [
                 {"headerName": "ID", "field": "id", "hide": True},
+                {"headerName": "ID", "field": "category_item_id", "hide": True},
                 {"headerName": "Created", "field": "created", "hide": True},
                 {"headerName": "Updated", "field": "updated", "hide": True},
                 {"headerName": "Date", "field": "transaction_date"},
@@ -274,7 +307,9 @@ def transaction_grid() -> None:
                     "valueFormatter": "'$' + value",
                 },
             ],
-            "rowData": transactions_list,
+            "rowData": sorted(
+                transactions_list, key=lambda data: data["transaction_date"]
+            ),
             "rowSelection": "single",
         }
     ).classes("max-h-80")
@@ -282,4 +317,4 @@ def transaction_grid() -> None:
     with ui.row().classes("mt-4"):
         ui.button("Add", color="Green", on_click=open_add_dialog)
         ui.button("Edit", on_click=open_edit_dialog)
-        ui.button("Delete", color="Red")
+        ui.button("Delete", color="Red", on_click=delete_transaction)

@@ -345,6 +345,11 @@ def get_category_items_with_related_data(category_item_id: int) -> CategoryItem:
         return category_item
 
 
+def get_category_item_by_id(category_item_id) -> CategoryItem:
+    with session:
+        return session.get(CategoryItem, category_item_id)
+
+
 def get_all_transactions() -> List[Transaction]:
     """Function that queries the database and returns all the Transactions.
     Returns:
@@ -356,7 +361,7 @@ def get_all_transactions() -> List[Transaction]:
     return transactions
 
 
-def get_transactions_by_date(start_date: str, end_date: str) -> Budget:
+def get_transactions_by_date(start_date: str, end_date: str) -> List[Transaction]:
     """
     Retrieves a Budget object with the given budget_id from the database and filters its transactions to only include those with a transaction_date between start_date and end_date.
 
@@ -379,6 +384,20 @@ def get_transactions_by_date(start_date: str, end_date: str) -> Budget:
         result = session.exec(statement)
         transactions = result.all()
         return transactions
+
+
+def get_transaction_by_id(transaction_id) -> Transaction:
+    with session:
+        return session.get(Transaction, transaction_id)
+
+
+def delete_transaction_by_id(transaction_id) -> None:
+    with session:
+        transaction = session.exec(
+            select(Transaction).where(Transaction.id == transaction_id)
+        ).one()
+        session.delete(transaction)
+        session.commit()
 
 
 # Data Visualization
