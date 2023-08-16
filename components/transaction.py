@@ -6,11 +6,12 @@ from database.db import (
     get_transactions_by_date,
     get_all_category_items,
     get_category_item_by_id,
+    update_transaction_by_id,
     get_transaction_by_id,
     delete_transaction_by_id,
     save_transaction,
 )
-from components import state
+from components import state, budget
 from constants import TRANSACTION_COLUMNS, RECURRING_OPTIONS
 
 category_item_select: ui.select = None
@@ -27,10 +28,28 @@ def add_transaction() -> None:
 
 def update_transaction() -> None:
     # TODO: Update Transaction Here
+    update_transaction_by_id(
+        transaction_id=state.selected_row["id"],
+        name=edit_transaction_name.value,
+        transaction_date=edit_transaction_date.value,
+        amount=f"{float(edit_transaction_amount.value)}",
+        category_item_id=state.selected_row["category_item_id"],
+    )
+
+    grid.options["rowData"] = sorted(
+        to_dict(
+            get_transactions_by_date(
+                start_date=state.reporting_start_date, end_date=state.reporting_end_date
+            )
+        ),
+        key=lambda data: data["transaction_date"],
+    )
+
+    ui.notify(f"Successfully Updated {edit_transaction_name.value}")
 
     edit_dialog.close()
-
-    ui.notify("Successfully Updated Transaction")
+    grid.update()
+    budget.budget_breakdown.refresh()
 
 
 async def delete_transaction() -> None:

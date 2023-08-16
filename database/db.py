@@ -391,7 +391,30 @@ def get_transaction_by_id(transaction_id) -> Transaction:
         return session.get(Transaction, transaction_id)
 
 
-def delete_transaction_by_id(transaction_id) -> None:
+def update_transaction_by_id(
+    transaction_id: int,
+    name: str,
+    transaction_date: str,
+    amount: str,
+    category_item_id: int,
+) -> None:
+    with session:
+        transaction = session.exec(
+            select(Transaction).where(Transaction.id == transaction_id)
+        ).first()
+
+        transaction.name = name
+        transaction.transaction_date = transaction_date
+        transaction.amount = amount
+        transaction.category_item_id = category_item_id
+        transaction.updated = datetime.utcnow()
+
+        session.add(transaction)
+        session.commit()
+        session.refresh(transaction)
+
+
+def delete_transaction_by_id(transaction_id: int) -> None:
     with session:
         transaction = session.exec(
             select(Transaction).where(Transaction.id == transaction_id)
