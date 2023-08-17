@@ -22,7 +22,6 @@ ui.dark_mode().enable()
 
 with ui.tabs().classes("w-full") as tabs:
     budget_planning = ui.tab("Budget Planning", icon="edit_document").classes("w-40")
-    budget_entry = ui.tab("Budget Entry", icon="note_add").classes("w-40")
     budget_report = ui.tab("Budget Reporting", icon="table_view").classes("w-40")
     budget_viz = (
         ui.tab("Budget Visualization", icon="insights")
@@ -32,12 +31,6 @@ with ui.tabs().classes("w-full") as tabs:
 with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
     with ui.tab_panel(budget_planning):
         category_item.create_category_item_form()
-
-    with ui.tab_panel(budget_entry):
-        with ui.row().classes("w-full"):
-            # income.income_entry()
-            # expense.expense_entry()
-            transaction.create_transaction_form()
 
     with ui.tab_panel(budget_report):
         common.budget_date_select()

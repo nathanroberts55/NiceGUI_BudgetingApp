@@ -489,11 +489,11 @@ def save_category_item(
     ui.notify(f"{name.value} Saved!")
 
 
-def save_transaction(
-    name: ui.input,
-    transaction_date: ui.input,
-    category_item_name: ui.select,
-    amount: ui.number,
+def create_transaction(
+    name: str,
+    transaction_date: str,
+    amount: str,
+    category_item_name: str,
 ) -> None:
     """Function to save transaction to the database
 
@@ -506,19 +506,21 @@ def save_transaction(
 
     with session:
         category_item: CategoryItem = session.exec(
-            select(CategoryItem).where(CategoryItem.name == category_item_name.value)
+            select(CategoryItem).where(CategoryItem.name == category_item_name)
         ).first()
 
-        Transaction.add(
-            session=session,
-            name=name.value,
-            transaction_date=transaction_date.value,
+        transaction = Transaction(
+            name=name,
+            transaction_date=transaction_date,
             category_item_id=category_item.id,
-            amount=amount.value,
+            amount=amount,
         )
+        session.add(transaction)
+        print("Saving Transaction")
         session.commit()
-
-    ui.notify(f"{name.value} Saved!")
+        print("Transaction Saved")
+        session.refresh(transaction)
+        print(transaction)
 
 
 def create_recurring_transactions(

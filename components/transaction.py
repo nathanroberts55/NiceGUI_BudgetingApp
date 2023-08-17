@@ -9,7 +9,7 @@ from database.db import (
     update_transaction_by_id,
     get_transaction_by_id,
     delete_transaction_by_id,
-    save_transaction,
+    create_transaction,
 )
 from components import state, budget
 from constants import TRANSACTION_COLUMNS, RECURRING_OPTIONS
@@ -20,10 +20,33 @@ grid: ui.aggrid = None
 
 def add_transaction() -> None:
     # TODO: Create Transaction Here
+    create_transaction(
+        name=add_transaction_name.value,
+        transaction_date=add_transaction_date.value,
+        amount=f"{float(add_transaction_amount.value):.2f}",
+        category_item_name=add_category_item.value,
+    )
+
+    grid.options["rowData"] = sorted(
+        to_dict(
+            get_transactions_by_date(
+                start_date=state.reporting_start_date, end_date=state.reporting_end_date
+            )
+        ),
+        key=lambda data: data["transaction_date"],
+    )
 
     add_dialog.close()
 
-    ui.notify("Successfully Saved Transaction", color="Green")
+    ui.notify(f"Successfully Saved {add_transaction_name.value}", color="Green")
+
+    add_transaction_name.set_value(None)
+    add_transaction_date.set_value(None)
+    add_transaction_amount.set_value(None)
+    add_category_item.set_value(None)
+
+    grid.update()
+    budget.budget_breakdown.refresh()
 
 
 def update_transaction() -> None:
@@ -32,7 +55,7 @@ def update_transaction() -> None:
         transaction_id=state.selected_row["id"],
         name=edit_transaction_name.value,
         transaction_date=edit_transaction_date.value,
-        amount=f"{float(edit_transaction_amount.value)}",
+        amount=f"{float(edit_transaction_amount.value):.2f}",
         category_item_id=state.selected_row["category_item_id"],
     )
 
