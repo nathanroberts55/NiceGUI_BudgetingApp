@@ -29,14 +29,15 @@ with ui.tabs().classes("w-full") as tabs:
         .classes("w-40")
     )
 with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
-    with ui.tab_panel(budget_planning):
-        category_item.create_category_item_form()
+    # with ui.tab_panel(budget_planning):
+    # category_item.create_category_item_form()
 
     with ui.tab_panel(budget_report):
         common.budget_date_select()
         budget.budget_breakdown()
         # category.transactions_tables_by_category()
         transaction.transaction_grid()
+        category_item.category_item_grid()
 
     with ui.tab_panel(budget_viz):
         ui.label("Data Visualizations Coming Soon!")
