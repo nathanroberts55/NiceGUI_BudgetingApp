@@ -21,7 +21,7 @@ if not os.path.exists("budget.db"):
 ui.dark_mode().enable()
 
 with ui.tabs().classes("w-full") as tabs:
-    budget_planning = ui.tab("Budget Planning", icon="edit_document").classes("w-40")
+    # budget_planning = ui.tab("Budget Planning", icon="edit_document").classes("w-40")
     budget_report = ui.tab("Budget Reporting", icon="table_view").classes("w-40")
     budget_viz = (
         ui.tab("Budget Visualization", icon="insights")
@@ -29,14 +29,11 @@ with ui.tabs().classes("w-full") as tabs:
         .classes("w-40")
     )
 with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
-    with ui.tab_panel(budget_planning):
-        category_item.create_category_item_form()
-
     with ui.tab_panel(budget_report):
         common.budget_date_select()
         budget.budget_breakdown()
-        # category.transactions_tables_by_category()
         transaction.transaction_grid()
+        category_item.category_item_grid()
 
     with ui.tab_panel(budget_viz):
         ui.label("Data Visualizations Coming Soon!")

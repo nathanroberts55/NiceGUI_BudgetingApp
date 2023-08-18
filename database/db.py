@@ -277,6 +277,15 @@ def get_all_categories() -> List[Category]:
     return category
 
 
+def get_category_by_id(category_id: int) -> None:
+    with session:
+        category = session.exec(
+            select(Category).where(Category.id == category_id)
+        ).first()
+
+        return category
+
+
 def get_category_with_related_data(category_id: int) -> Category:
     """
     This function takes a category_id as an argument and returns a Category object with its related data.
@@ -457,9 +466,7 @@ def save_budget(budget_name: ui.input) -> None:
     ui.notify(f"{budget_name.value} Saved!")
 
 
-def save_category_item(
-    name: ui.input, budget: Budget, category_name: ui.select, budgeted_amount: ui.number
-) -> None:
+def create_category_item(name: str, category_name: str, budgeted_amount: str) -> None:
     """Saves a new category item to the database.
 
     This method is called when the Category Item form is submitted. It creates a new Category Item and commits it to the database.
@@ -473,20 +480,52 @@ def save_category_item(
     """
 
     with session:
-        CategoryItem.add(
+        category = session.exec(
+            select(Category).where(Category.name == category_name)
+        ).first()
+
+        new_item = CategoryItem.add(
             session=session,
-            budget=budget.id,
-            category_id=[
-                category
-                for category in budget.categories
-                if category.name == category_name.value
-            ][0].id,
-            name=name.value,
-            budgeted=budgeted_amount.value,
+            name=name,
+            budgeted=budgeted_amount,
+            category_id=category.id,
         )
         session.commit()
+        session.refresh(new_item)
 
-    ui.notify(f"{name.value} Saved!")
+
+def update_category_item_by_id(
+    category_item_id: int,
+    name: str,
+    category_name: str,
+    budgeted_amount: str,
+) -> None:
+    with session:
+        category_item = session.exec(
+            select(CategoryItem).where(CategoryItem.id == category_item_id)
+        ).first()
+
+        category = session.exec(
+            select(Category).where(Category.name == category_name)
+        ).first()
+
+        category_item.name = name
+        category_item.category_id = category.id
+        category_item.budgeted = budgeted_amount
+        category_item.updated = datetime.utcnow()
+
+        session.add(category_item)
+        session.commit()
+        session.refresh(category_item)
+
+
+def delete_category_item_by_id(category_item_id: int) -> None:
+    with session:
+        category_item = session.exec(
+            select(CategoryItem).where(CategoryItem.id == category_item_id)
+        ).one()
+        session.delete(category_item)
+        session.commit()
 
 
 def create_transaction(

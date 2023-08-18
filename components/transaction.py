@@ -50,11 +50,11 @@ def add_transaction() -> None:
 
 def update_transaction() -> None:
     update_transaction_by_id(
-        transaction_id=state.selected_row["id"],
+        transaction_id=state.selected_transaction["id"],
         name=edit_transaction_name.value,
         transaction_date=edit_transaction_date.value,
         amount=f"{float(edit_transaction_amount.value):.2f}",
-        category_item_id=state.selected_row["category_item_id"],
+        category_item_id=state.selected_transaction["category_item_id"],
     )
 
     grid.options["rowData"] = sorted(
@@ -74,7 +74,7 @@ def update_transaction() -> None:
 
 
 async def delete_transaction() -> None:
-    row = await grid.get_selected_row()
+    row = await grid.get_selected_transaction()
 
     if not row:
         ui.notify("No Row Selected. Please select and try again.", color="Red")
@@ -102,18 +102,20 @@ def open_add_dialog() -> None:
 
 
 async def open_edit_dialog() -> None:
-    state.selected_row = await grid.get_selected_row()
+    state.selected_transaction = await grid.get_selected_transaction()
 
-    if not state.selected_row:
+    if not state.selected_transaction:
         ui.notify("No Row Selected. Please select and try again.", color="Red")
         return
 
-    category_item = get_category_item_by_id(state.selected_row["category_item_id"])
+    category_item = get_category_item_by_id(
+        state.selected_transaction["category_item_id"]
+    )
 
     edit_category_item.set_value(category_item.name)
-    edit_transaction_name.set_value(state.selected_row["name"])
-    edit_transaction_date.set_value(state.selected_row["transaction_date"])
-    edit_transaction_amount.set_value(state.selected_row["amount"])
+    edit_transaction_name.set_value(state.selected_transaction["name"])
+    edit_transaction_date.set_value(state.selected_transaction["transaction_date"])
+    edit_transaction_amount.set_value(state.selected_transaction["amount"])
 
     edit_dialog.open()
 
@@ -260,31 +262,43 @@ def transaction_grid() -> None:
     )
     transactions_list = to_dict(transactions)
 
-    ui.label("Transaction Table").classes("text-2xl mt-6 mb-2")
-    grid = ui.aggrid(
-        {
-            "defaultColDef": {"flex": 1},
-            "columnDefs": [
-                {"headerName": "ID", "field": "id", "hide": True},
-                {"headerName": "ID", "field": "category_item_id", "hide": True},
-                {"headerName": "Created", "field": "created", "hide": True},
-                {"headerName": "Updated", "field": "updated", "hide": True},
-                {"headerName": "Date", "field": "transaction_date"},
-                {"headerName": "Name", "field": "name"},
-                {
-                    "headerName": "Amount",
-                    "field": "amount",
-                    "valueFormatter": "'$' + value",
-                },
-            ],
-            "rowData": sorted(
-                transactions_list, key=lambda data: data["transaction_date"]
-            ),
-            "rowSelection": "single",
-        }
-    ).classes("max-h-80")
+    with ui.expansion("Transaction Table").classes("text-2xl mt-6 mb-2"):
+        grid = ui.aggrid(
+            {
+                "defaultColDef": {"flex": 1},
+                "columnDefs": [
+                    {"headerName": "ID", "field": "id", "hide": True},
+                    {"headerName": "ID", "field": "category_item_id", "hide": True},
+                    {"headerName": "Created", "field": "created", "hide": True},
+                    {"headerName": "Updated", "field": "updated", "hide": True},
+                    {
+                        "headerName": "Date",
+                        "field": "transaction_date",
+                        "filter": "agTextColumnFilter",
+                        "floatingFilter": True,
+                    },
+                    {
+                        "headerName": "Name",
+                        "field": "name",
+                        "filter": "agTextColumnFilter",
+                        "floatingFilter": True,
+                    },
+                    {
+                        "headerName": "Amount",
+                        "field": "amount",
+                        "valueFormatter": "'$' + value",
+                        "filter": "agTextColumnFilter",
+                        "floatingFilter": True,
+                    },
+                ],
+                "rowData": sorted(
+                    transactions_list, key=lambda data: data["transaction_date"]
+                ),
+                "rowSelection": "single",
+            }
+        ).classes("max-h-120")
 
-    with ui.row().classes("mt-4"):
-        ui.button("Add", color="Green", on_click=open_add_dialog)
-        ui.button("Edit", on_click=open_edit_dialog)
-        ui.button("Delete", color="Red", on_click=delete_transaction)
+        with ui.row().classes("mt-4"):
+            ui.button("Add", color="Green", on_click=open_add_dialog)
+            ui.button("Edit", on_click=open_edit_dialog)
+            ui.button("Delete", color="Red", on_click=delete_transaction)
