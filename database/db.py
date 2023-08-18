@@ -345,6 +345,11 @@ def get_category_items_with_related_data(category_item_id: int) -> CategoryItem:
         return category_item
 
 
+def get_category_item_by_id(category_item_id) -> CategoryItem:
+    with session:
+        return session.get(CategoryItem, category_item_id)
+
+
 def get_all_transactions() -> List[Transaction]:
     """Function that queries the database and returns all the Transactions.
     Returns:
@@ -354,6 +359,68 @@ def get_all_transactions() -> List[Transaction]:
         transactions = session.exec(select(Transaction)).all()
 
     return transactions
+
+
+def get_transactions_by_date(start_date: str, end_date: str) -> List[Transaction]:
+    """
+    Retrieves a Budget object with the given budget_id from the database and filters its transactions to only include those with a transaction_date between start_date and end_date.
+
+    :param budget_id: The id of the budget to retrieve from the database.
+    :type budget_id: int
+    :param start_date: The start date of the date range to filter transactions by.
+    :type start_date: str
+    :param end_date: The end date of the date range to filter transactions by.
+    :type end_date: str
+    :return: A Budget object with filtered transactions.
+    :rtype: Budget
+    """
+
+    with session:
+        # Access the transactions relationship attribute to get the related transactions
+        statement = select(Transaction).where(
+            Transaction.transaction_date >= start_date,
+            Transaction.transaction_date <= end_date,
+        )
+        result = session.exec(statement)
+        transactions = result.all()
+        return transactions
+
+
+def get_transaction_by_id(transaction_id) -> Transaction:
+    with session:
+        return session.get(Transaction, transaction_id)
+
+
+def update_transaction_by_id(
+    transaction_id: int,
+    name: str,
+    transaction_date: str,
+    amount: str,
+    category_item_id: int,
+) -> None:
+    with session:
+        transaction = session.exec(
+            select(Transaction).where(Transaction.id == transaction_id)
+        ).first()
+
+        transaction.name = name
+        transaction.transaction_date = transaction_date
+        transaction.amount = amount
+        transaction.category_item_id = category_item_id
+        transaction.updated = datetime.utcnow()
+
+        session.add(transaction)
+        session.commit()
+        session.refresh(transaction)
+
+
+def delete_transaction_by_id(transaction_id: int) -> None:
+    with session:
+        transaction = session.exec(
+            select(Transaction).where(Transaction.id == transaction_id)
+        ).one()
+        session.delete(transaction)
+        session.commit()
 
 
 # Data Visualization
@@ -422,11 +489,11 @@ def save_category_item(
     ui.notify(f"{name.value} Saved!")
 
 
-def save_transaction(
-    name: ui.input,
-    transaction_date: ui.input,
-    category_item_name: ui.select,
-    amount: ui.number,
+def create_transaction(
+    name: str,
+    transaction_date: str,
+    amount: str,
+    category_item_name: str,
 ) -> None:
     """Function to save transaction to the database
 
@@ -439,19 +506,21 @@ def save_transaction(
 
     with session:
         category_item: CategoryItem = session.exec(
-            select(CategoryItem).where(CategoryItem.name == category_item_name.value)
+            select(CategoryItem).where(CategoryItem.name == category_item_name)
         ).first()
 
-        Transaction.add(
-            session=session,
-            name=name.value,
-            transaction_date=transaction_date.value,
+        transaction = Transaction(
+            name=name,
+            transaction_date=transaction_date,
             category_item_id=category_item.id,
-            amount=amount.value,
+            amount=amount,
         )
+        session.add(transaction)
+        print("Saving Transaction")
         session.commit()
-
-    ui.notify(f"{name.value} Saved!")
+        print("Transaction Saved")
+        session.refresh(transaction)
+        print(transaction)
 
 
 def create_recurring_transactions(

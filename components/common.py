@@ -1,6 +1,7 @@
 from nicegui import ui
 from components.budget import budget_breakdown
 from components.category import transactions_tables_by_category
+from components.transaction import transaction_grid
 from utils import get_current_month
 from components import state
 
@@ -49,3 +50,4 @@ def date_select_onclick(start_date: ui.date, end_date: ui.date) -> None:
     state.reporting_end_date = end_date.value
     budget_breakdown.refresh()
     transactions_tables_by_category.refresh()
+    transaction_grid.refresh()
