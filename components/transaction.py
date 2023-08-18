@@ -19,7 +19,6 @@ grid: ui.aggrid = None
 
 
 def add_transaction() -> None:
-    # TODO: Create Transaction Here
     create_transaction(
         name=add_transaction_name.value,
         transaction_date=add_transaction_date.value,
@@ -50,7 +49,6 @@ def add_transaction() -> None:
 
 
 def update_transaction() -> None:
-    # TODO: Update Transaction Here
     update_transaction_by_id(
         transaction_id=state.selected_row["id"],
         name=edit_transaction_name.value,
