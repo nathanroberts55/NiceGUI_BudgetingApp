@@ -152,6 +152,54 @@ with ui.dialog() as add_dialog:
                 lambda: add_transaction_amount.update(),
             )
         )
+        # region Recurring Transaction
+        # add_transaction_recuring = ui.switch("Recuring Transaction").classes(
+        #     "w-full  m-auto"
+        # )
+        # add_transaction_recurring_frequency = (
+        #     ui.select(RECURRING_OPTIONS, label="Frequency", value=RECURRING_OPTIONS[0])
+        #     .bind_visibility_from(add_transaction_recuring, "value")
+        #     .classes("w-full m-auto")
+        # )
+
+        # # Reccuring Start Date
+        # with ui.input(label="Start Date").classes("w-full m-auto").on(
+        #     "blur", lambda: enable_next(add_transaction_amount)
+        # ).bind_visibility_from(
+        #     add_transaction_recuring, "value"
+        # ) as add_recurring_start_date:
+        #     with ui.menu() as menu:
+        #         ui.date().bind_value(add_recurring_start_date)
+        #     with add_recurring_start_date.add_slot("append"):
+        #         ui.icon("edit_calendar").on("click", menu.open).classes(
+        #             "cursor-pointer"
+        #         )
+
+        # # Reccuring End Date
+        # with ui.input(label="End Date").classes("w-full m-auto").on(
+        #     "blur", lambda: enable_next(add_transaction_amount)
+        # ).bind_visibility_from(
+        #     add_transaction_recuring, "value"
+        # ) as add_transaction_end_date:
+        #     with ui.menu() as menu:
+        #         ui.date().bind_value(add_transaction_end_date)
+        #     with add_transaction_end_date.add_slot("append"):
+        #         ui.icon("edit_calendar").on("click", menu.open).classes(
+        #             "cursor-pointer"
+        #         )
+
+        # add_transaction_recurring_dates = (
+        #     ui.select(
+        #         [day for day in range(1, 32)],
+        #         multiple=True,
+        #         value=1,
+        #         label="Recurring Dates",
+        #     )
+        #     .bind_visibility_from(add_transaction_recuring, "value")
+        #     .props("use-chips")
+        #     .classes("m-auto w-full")
+        # )
+        # endregion Recurring Transaction
         ui.button("Save New Transaction", on_click=add_transaction).classes("m-auto")
 
 with ui.dialog() as edit_dialog:
@@ -198,62 +246,6 @@ def transactions_tables() -> None:
         ).classes("text-right")
     else:
         ui.label("No Income to Show").classes("text-semibold text-xl")
-
-
-# region Recurring Transaction
-# transaction_recuring = ui.switch("Recuring Transaction").classes(
-#     "w-3/4 text-xl m-auto"
-# )
-# transaction_recurring_frequency = (
-#     ui.select(
-#         RECURRING_OPTIONS, label="Frequency", value=RECURRING_OPTIONS[0]
-#     )
-#     .bind_visibility_from(transaction_recuring, "value")
-#     .classes("w-3/4 m-auto")
-# )
-
-# # Reccuring Start Date
-# ui.label("Start Date:").classes("text-xl m-auto").bind_visibility_from(
-#     transaction_recuring, "value"
-# )
-# with ui.input("Start Date").classes("w-3/4 m-auto").on(
-#     "blur", lambda: enable_next(transaction_amount)
-# ).bind_visibility_from(
-#     transaction_recuring, "value"
-# ) as recurring_start_date:
-#     with ui.menu() as menu:
-#         ui.date().bind_value(recurring_start_date)
-#     with recurring_start_date.add_slot("append"):
-#         ui.icon("edit_calendar").on("click", menu.open).classes(
-#             "cursor-pointer"
-#         )
-
-# # Reccuring End Date
-# ui.label("End Date:").classes("text-xl m-auto").bind_visibility_from(
-#     transaction_recuring, "value"
-# )
-# with ui.input("End Date").classes("w-3/4 m-auto").on(
-#     "blur", lambda: enable_next(transaction_amount)
-# ).bind_visibility_from(transaction_recuring, "value") as transaction_date:
-#     with ui.menu() as menu:
-#         ui.date().bind_value(transaction_date)
-#     with transaction_date.add_slot("append"):
-#         ui.icon("edit_calendar").on("click", menu.open).classes(
-#             "cursor-pointer"
-#         )
-
-# ui.label("Recurring Dates").bind_visibility_from(
-#     transaction_recuring, "value"
-# ).classes("text-xl m-auto")
-# transaction_recurring_dates = (
-#     ui.select(
-#         [day for day in range(1, 32)], multiple=True, value=1, label="Day"
-#     )
-#     .bind_visibility_from(transaction_recuring, "value")
-#     .props("use-chips")
-#     .classes("m-auto w-3/4")
-# )
-# endregion Recurring Transaction
 
 
 @ui.refreshable
