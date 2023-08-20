@@ -2,7 +2,6 @@ from nicegui import ui
 from utils import enable_next, to_dict
 from components import budget, state
 from database.db import (
-    get_budget_with_related_data,
     get_all_category_items,
     delete_category_item_by_id,
     get_category_by_id,
@@ -16,7 +15,6 @@ category_select: ui.select = None
 item_name: ui.input = None
 item_budget: ui.number = None
 save_button: ui.button = None
-# budget = None
 grid: ui.aggrid = None
 
 
