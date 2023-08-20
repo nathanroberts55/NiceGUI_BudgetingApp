@@ -405,17 +405,21 @@ def update_transaction_by_id(
     name: str,
     transaction_date: str,
     amount: str,
-    category_item_id: int,
+    category_item_name: str,
 ) -> None:
     with session:
         transaction = session.exec(
             select(Transaction).where(Transaction.id == transaction_id)
         ).first()
 
+        category_item = session.exec(
+            select(CategoryItem).where(CategoryItem.name == category_item_name)
+        ).first()
+
         transaction.name = name
         transaction.transaction_date = transaction_date
         transaction.amount = amount
-        transaction.category_item_id = category_item_id
+        transaction.category_item_id = category_item.id
         transaction.updated = datetime.utcnow()
 
         session.add(transaction)
@@ -555,11 +559,8 @@ def create_transaction(
             amount=amount,
         )
         session.add(transaction)
-        print("Saving Transaction")
         session.commit()
-        print("Transaction Saved")
         session.refresh(transaction)
-        print(transaction)
 
 
 def create_recurring_transactions(

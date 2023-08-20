@@ -25,21 +25,43 @@ def budget_breakdown() -> None:
         1, start_date=state.reporting_start_date, end_date=state.reporting_end_date
     )
     ui.label(budget.name).classes("text-semibold text-3xl my-5")
+    with ui.grid(columns=5):
+        ui.label("Name").classes("text-semibold ml-20")
+        ui.label("Budget")
+        ui.label("Acutal")
+        ui.label("% of Budgeted Income")
+        ui.label("Over\\Under")
     ui.splitter(horizontal=True)
     for category in budget.categories:
         ui.label(category.name).classes("text-semibold text-2xl ml-10")
         for category_item in category.category_items:
-            with ui.grid(columns=3):
+            with ui.grid(columns=5):
                 ui.label(category_item.name).classes("text-semibold ml-20")
-                ui.label("{:.2f}".format(float(category_item.budgeted)))
-                ui.label("{:.2f}".format(category_item.actual))
-        with ui.grid(columns=3):
+                ui.label("$ {:.2f}".format(float(category_item.budgeted)))
+                ui.label("$ {:.2f}".format(category_item.actual))
+                ui.label("{:.2f}%".format(category_item.percent_of_budget))
+                ui.label(
+                    (
+                        lambda x: "($ {:.2f})".format(abs(x))
+                        if x < 0
+                        else "$ {:.2f}".format(x)
+                    )(category_item.over_under)
+                )
+        with ui.grid(columns=5):
             ui.label("TOTAL").classes("text-bold ml-20")
-            ui.label("{:.2f}".format(category.budgeted_total)).classes("text-bold")
-            ui.label("{:.2f}".format(category.actual_total)).classes("text-bold")
+            ui.label("$ {:.2f}".format(category.budgeted_total)).classes("text-bold")
+            ui.label("$ {:.2f}".format(category.actual_total)).classes("text-bold")
+            ui.label("{:.2f}%".format(category.percent_of_budget)).classes("text-bold")
+            ui.label(
+                (
+                    lambda x: "($ {:.2f})".format(abs(x))
+                    if x < 0
+                    else "$ {:.2f}".format(x)
+                )(category.over_under)
+            ).classes("text-bold")
         ui.splitter(horizontal=True)
     ui.splitter(horizontal=True).classes("mt-2")
-    with ui.grid(columns=3):
+    with ui.grid(columns=5):
         ui.label("Budget Total Balance").classes("text-bold ml-20")
         ui.label(f"$ {'{:.2f}'.format(budget.budgeted_balance)}").classes("text-bold")
         ui.label(f"$ {'{:.2f}'.format(budget.actual_balance)}").classes("text-bold")
