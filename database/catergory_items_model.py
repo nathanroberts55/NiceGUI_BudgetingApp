@@ -33,15 +33,15 @@ class CategoryItem(SQLModel, table=True):
     @property
     def percent_of_budget(self) -> float:
         # The percent_of_budget property calculates the percentage of actual_total relative to budgeted_total
-        if self.budgeted:
-            return (self.actual / self.budgeted) * 100
+        if float(self.budgeted):
+            return (float(self.actual) / float(self.budgeted)) * 100
         else:
             return 0.0
 
     @property
     def over_under(self) -> float:
         # The over_under property calculates the difference between actual_total and budgeted_total
-        return self.actual - self.budgeted
+        return float(self.actual) - float(self.budgeted)
 
     # Define a class method to save the new object to the database
     @classmethod

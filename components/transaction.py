@@ -54,7 +54,7 @@ def update_transaction() -> None:
         name=edit_transaction_name.value,
         transaction_date=edit_transaction_date.value,
         amount=f"{float(edit_transaction_amount.value):.2f}",
-        category_item_id=state.selected_transaction["category_item_id"],
+        category_item_name=edit_category_item.value,
     )
 
     grid.options["rowData"] = sorted(
@@ -74,7 +74,7 @@ def update_transaction() -> None:
 
 
 async def delete_transaction() -> None:
-    row = await grid.get_selected_transaction()
+    row = await grid.get_selected_row()
 
     if not row:
         ui.notify("No Row Selected. Please select and try again.", color="Red")
@@ -95,6 +95,8 @@ async def delete_transaction() -> None:
 
     ui.notify("Successfully Deleted Transaction", color="Red")
 
+    budget.budget_breakdown.refresh()
+
 
 def open_add_dialog() -> None:
     # Open the Add Transaction dialog
@@ -102,7 +104,7 @@ def open_add_dialog() -> None:
 
 
 async def open_edit_dialog() -> None:
-    state.selected_transaction = await grid.get_selected_transaction()
+    state.selected_transaction = await grid.get_selected_row()
 
     if not state.selected_transaction:
         ui.notify("No Row Selected. Please select and try again.", color="Red")
@@ -122,7 +124,7 @@ async def open_edit_dialog() -> None:
 
 with ui.dialog() as add_dialog:
     with ui.card():
-        category_items = get_all_category_items()
+        category_items = sorted(get_all_category_items(), key=lambda data: data.name)
         add_category_item = ui.select(
             [category_item.name for category_item in category_items],
             value="Select a Category",
@@ -154,7 +156,7 @@ with ui.dialog() as add_dialog:
 
 with ui.dialog() as edit_dialog:
     with ui.card():
-        category_items = get_all_category_items()
+        category_items = sorted(get_all_category_items(), key=lambda data: data.name)
         edit_category_item = ui.select(
             [category_item.name for category_item in category_items],
         ).classes("w-full")
