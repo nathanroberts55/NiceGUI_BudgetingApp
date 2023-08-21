@@ -36,6 +36,6 @@ with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
         transaction.transaction_grid()
 
     with ui.tab_panel(budget_viz):
-        ui.label("Data Visualizations Coming Soon!")
+        budget.budget_guage()
 
 ui.run(title="Budgeting App", favicon="assets\\budgeting.png")
