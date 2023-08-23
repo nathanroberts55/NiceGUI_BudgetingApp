@@ -2,14 +2,13 @@ from nicegui import ui
 from utils import to_dict, enable_next
 from database.db import (
     get_all_transactions,
-    get_budget_with_related_data,
     get_transactions_by_date,
     get_all_category_items,
     get_category_item_by_id,
     update_transaction_by_id,
-    get_transaction_by_id,
     delete_transaction_by_id,
     create_transaction,
+    get_transaction_dataframe,
 )
 from components import state, budget
 from constants import TRANSACTION_COLUMNS, RECURRING_OPTIONS
@@ -296,3 +295,9 @@ def transaction_grid() -> None:
             ui.button("Add", color="Green", on_click=open_add_dialog)
             ui.button("Edit", on_click=open_edit_dialog)
             ui.button("Delete", color="Red", on_click=delete_transaction)
+
+
+@ui.refreshable
+def transactions_linechart() -> None:
+    transaction_df = get_transaction_dataframe()
+    print(transaction_df)

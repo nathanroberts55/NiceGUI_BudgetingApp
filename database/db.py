@@ -3,7 +3,7 @@ import pandas as pd
 import random
 from typing import List
 from datetime import datetime, timedelta
-from utils import okay, warn, error, generate_random_float, parse_date
+from utils import okay, warn, error, generate_random_float, parse_date, to_dict
 from sqlmodel import SQLModel, Session, create_engine, select, cast, DateTime
 from .budget_model import Budget
 from .category_model import Category
@@ -437,14 +437,18 @@ def delete_transaction_by_id(transaction_id: int) -> None:
 
 
 # Data Visualization
-def get_transaction_data() -> pd.DataFrame | None:
+def get_transaction_dataframe() -> pd.DataFrame | None:
     """_summary_
 
     Returns:
         pd.DataFrame: Transactions in the form a pandas dataframe
     """
+    with session:
+        transactions = session.exec(select(Transaction)).all()
+        transactions = to_dict(transactions)
+        transactions_df = pd.DataFrame(transactions)
 
-    return None
+    return transactions_df
 
 
 def save_budget(budget_name: ui.input) -> None:
