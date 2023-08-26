@@ -436,21 +436,6 @@ def delete_transaction_by_id(transaction_id: int) -> None:
         session.commit()
 
 
-# Data Visualization
-def get_transaction_dataframe() -> pd.DataFrame | None:
-    """_summary_
-
-    Returns:
-        pd.DataFrame: Transactions in the form a pandas dataframe
-    """
-    with session:
-        transactions = session.exec(select(Transaction)).all()
-        transactions = to_dict(transactions)
-        transactions_df = pd.DataFrame(transactions)
-
-    return transactions_df
-
-
 def save_budget(budget_name: ui.input) -> None:
     """When the Budget form is submitted, create a transaction and commit to the database
 

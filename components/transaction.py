@@ -1,4 +1,6 @@
 from nicegui import ui
+import pandas as pd
+import plotly.graph_objects as go
 from utils import to_dict, enable_next
 from database.db import (
     get_all_transactions,
@@ -8,7 +10,6 @@ from database.db import (
     update_transaction_by_id,
     delete_transaction_by_id,
     create_transaction,
-    get_transaction_dataframe,
 )
 from components import state, budget
 from constants import TRANSACTION_COLUMNS, RECURRING_OPTIONS
@@ -298,6 +299,64 @@ def transaction_grid() -> None:
 
 
 @ui.refreshable
-def transactions_linechart() -> None:
-    transaction_df = get_transaction_dataframe()
-    print(transaction_df)
+def transactions_over_time_chart() -> None:
+    transactions = get_transactions_by_date(
+        start_date=state.viz_start_date, end_date=state.viz_end_date
+    )
+
+    transaction_df = pd.DataFrame(to_dict(transactions))
+
+    transaction_df = transaction_df.astype(
+        {
+            "id": "int",
+            "name": "str",
+            "amount": "float",
+            "transaction_date": "str",
+            "created": "str",
+            "updated": "str",
+            "category_item_id": "int",
+        }
+    )
+
+    transaction_df = transaction_df[
+        [
+            "id",
+            "name",
+            "amount",
+            "transaction_date",
+            "created",
+            "updated",
+            "category_item_id",
+        ]
+    ]
+
+    transaction_df["transaction_date"] = pd.to_datetime(
+        transaction_df["transaction_date"], format="%m/%d/%y"
+    )
+    transaction_df["created"] = pd.to_datetime(
+        transaction_df["created"], format="%Y-%m-%d %H:%M:%S.%f"
+    )
+    transaction_df["updated"] = pd.to_datetime(
+        transaction_df["updated"], format="%Y-%m-%d %H:%M:%S.%f"
+    )
+
+    grouped_transaction_df = (
+        transaction_df.groupby(["transaction_date"])["amount"].sum().reset_index()
+    )
+
+    fig = go.Figure(
+        data=go.Scatter(
+            x=grouped_transaction_df.transaction_date,
+            y=grouped_transaction_df.amount,
+        )
+    )
+
+    # Set the background color to black
+    fig.update_layout(
+        plot_bgcolor="#1d1d1d",
+        paper_bgcolor="#1d1d1d",
+        font={"color": "white"},
+        title=f"Spending over Period: {state.viz_start_date} - {state.viz_end_date}",
+    )
+
+    ui.plotly(fig)

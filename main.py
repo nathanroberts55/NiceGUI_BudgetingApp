@@ -30,13 +30,14 @@ with ui.tabs().classes("w-full") as tabs:
     )
 with ui.tab_panels(tabs, value=budget_viz).classes("w-full"):
     with ui.tab_panel(budget_report):
-        common.budget_date_select()
+        common.reporting_budget_date_select()
         budget.budget_breakdown()
         category_item.category_item_grid()
         transaction.transaction_grid()
 
     with ui.tab_panel(budget_viz):
+        common.viz_budget_date_select()
         budget.budget_guage()
-        transaction.transactions_linechart()
+        transaction.transactions_over_time_chart()
 
 ui.run(title="Budgeting App", favicon="assets\\budgeting.png")
