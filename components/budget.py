@@ -72,7 +72,7 @@ def budget_breakdown() -> None:
 @ui.refreshable
 def budget_guage() -> None:
     budget = get_budget_data_by_date(
-        1, start_date=state.reporting_start_date, end_date=state.reporting_end_date
+        1, start_date=state.viz_start_date, end_date=state.viz_end_date
     )
 
     fig = go.Figure(

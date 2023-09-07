@@ -1,6 +1,9 @@
 from nicegui import ui
 from components.budget import budget_breakdown, budget_guage
-from components.category import transactions_tables_by_category
+from components.category import (
+    transactions_tables_by_category,
+    spending_breakdown_chart,
+)
 from components.transaction import transaction_grid, transactions_over_time_chart
 from utils import get_current_month
 from components import state
@@ -97,3 +100,4 @@ def viz_date_select_onclick(start_date: ui.date, end_date: ui.date) -> None:
     state.viz_end_date = end_date.value
     transactions_over_time_chart.refresh()
     budget_guage.refresh()
+    spending_breakdown_chart.refresh()

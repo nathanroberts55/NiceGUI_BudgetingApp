@@ -304,59 +304,68 @@ def transactions_over_time_chart() -> None:
         start_date=state.viz_start_date, end_date=state.viz_end_date
     )
 
-    transaction_df = pd.DataFrame(to_dict(transactions))
-
-    transaction_df = transaction_df.astype(
-        {
-            "id": "int",
-            "name": "str",
-            "amount": "float",
-            "transaction_date": "str",
-            "created": "str",
-            "updated": "str",
-            "category_item_id": "int",
-        }
-    )
-
-    transaction_df = transaction_df[
-        [
-            "id",
-            "name",
-            "amount",
-            "transaction_date",
-            "created",
-            "updated",
-            "category_item_id",
-        ]
+    transactions = [
+        transaction
+        for transaction in transactions
+        if transaction.category_item_id not in [1, 9, 10]  # Exclude Income Sources
     ]
 
-    transaction_df["transaction_date"] = pd.to_datetime(
-        transaction_df["transaction_date"], format="%m/%d/%y"
-    )
-    transaction_df["created"] = pd.to_datetime(
-        transaction_df["created"], format="%Y-%m-%d %H:%M:%S.%f"
-    )
-    transaction_df["updated"] = pd.to_datetime(
-        transaction_df["updated"], format="%Y-%m-%d %H:%M:%S.%f"
-    )
+    transaction_df = pd.DataFrame(to_dict(transactions))
 
-    grouped_transaction_df = (
-        transaction_df.groupby(["transaction_date"])["amount"].sum().reset_index()
-    )
-
-    fig = go.Figure(
-        data=go.Scatter(
-            x=grouped_transaction_df.transaction_date,
-            y=grouped_transaction_df.amount,
+    if not transaction_df.empty:
+        transaction_df = transaction_df.astype(
+            {
+                "id": "int",
+                "name": "str",
+                "amount": "float",
+                "transaction_date": "str",
+                "created": "str",
+                "updated": "str",
+                "category_item_id": "int",
+            }
         )
-    )
 
-    # Set the background color to black
-    fig.update_layout(
-        plot_bgcolor="#1d1d1d",
-        paper_bgcolor="#1d1d1d",
-        font={"color": "white"},
-        title=f"Spending over Period: {state.viz_start_date} - {state.viz_end_date}",
-    )
+        transaction_df = transaction_df[
+            [
+                "id",
+                "name",
+                "amount",
+                "transaction_date",
+                "created",
+                "updated",
+                "category_item_id",
+            ]
+        ]
 
-    ui.plotly(fig)
+        transaction_df["transaction_date"] = pd.to_datetime(
+            transaction_df["transaction_date"], format="%m/%d/%y"
+        )
+        transaction_df["created"] = pd.to_datetime(
+            transaction_df["created"], format="%Y-%m-%d %H:%M:%S.%f"
+        )
+        transaction_df["updated"] = pd.to_datetime(
+            transaction_df["updated"], format="%Y-%m-%d %H:%M:%S.%f"
+        )
+
+        grouped_transaction_df = (
+            transaction_df.groupby(["transaction_date"])["amount"].sum().reset_index()
+        )
+
+        fig = go.Figure(
+            data=go.Scatter(
+                x=grouped_transaction_df.transaction_date,
+                y=grouped_transaction_df.amount,
+            )
+        )
+
+        # Set the background color to black
+        fig.update_layout(
+            plot_bgcolor="#1d1d1d",
+            paper_bgcolor="#1d1d1d",
+            font={"color": "white"},
+            title=f"Spending over Period: {state.viz_start_date} - {state.viz_end_date}",
+        )
+
+        ui.plotly(fig)
+    else:
+        ui.label("No Data to Show for the period")

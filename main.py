@@ -39,5 +39,6 @@ with ui.tab_panels(tabs, value=budget_viz).classes("w-full"):
         common.viz_budget_date_select()
         budget.budget_guage()
         transaction.transactions_over_time_chart()
+        category.spending_breakdown_chart()
 
 ui.run(title="Budgeting App", favicon="assets\\budgeting.png")
