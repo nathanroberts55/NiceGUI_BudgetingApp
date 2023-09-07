@@ -28,14 +28,17 @@ with ui.tabs().classes("w-full") as tabs:
         # .on("blur", update_data)
         .classes("w-40")
     )
-with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
+with ui.tab_panels(tabs, value=budget_viz).classes("w-full"):
     with ui.tab_panel(budget_report):
-        common.budget_date_select()
+        common.reporting_budget_date_select()
         budget.budget_breakdown()
         category_item.category_item_grid()
         transaction.transaction_grid()
 
     with ui.tab_panel(budget_viz):
-        ui.label("Data Visualizations Coming Soon!")
+        common.viz_budget_date_select()
+        budget.budget_guage()
+        transaction.transactions_over_time_chart()
+        category.spending_breakdown_chart()
 
 ui.run(title="Budgeting App", favicon="assets\\budgeting.png")

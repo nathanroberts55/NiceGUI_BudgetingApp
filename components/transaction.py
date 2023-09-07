@@ -1,13 +1,13 @@
 from nicegui import ui
+import pandas as pd
+import plotly.graph_objects as go
 from utils import to_dict, enable_next
 from database.db import (
     get_all_transactions,
-    get_budget_with_related_data,
     get_transactions_by_date,
     get_all_category_items,
     get_category_item_by_id,
     update_transaction_by_id,
-    get_transaction_by_id,
     delete_transaction_by_id,
     create_transaction,
 )
@@ -296,3 +296,76 @@ def transaction_grid() -> None:
             ui.button("Add", color="Green", on_click=open_add_dialog)
             ui.button("Edit", on_click=open_edit_dialog)
             ui.button("Delete", color="Red", on_click=delete_transaction)
+
+
+@ui.refreshable
+def transactions_over_time_chart() -> None:
+    transactions = get_transactions_by_date(
+        start_date=state.viz_start_date, end_date=state.viz_end_date
+    )
+
+    transactions = [
+        transaction
+        for transaction in transactions
+        if transaction.category_item_id not in [1, 9, 10]  # Exclude Income Sources
+    ]
+
+    transaction_df = pd.DataFrame(to_dict(transactions))
+
+    if not transaction_df.empty:
+        transaction_df = transaction_df.astype(
+            {
+                "id": "int",
+                "name": "str",
+                "amount": "float",
+                "transaction_date": "str",
+                "created": "str",
+                "updated": "str",
+                "category_item_id": "int",
+            }
+        )
+
+        transaction_df = transaction_df[
+            [
+                "id",
+                "name",
+                "amount",
+                "transaction_date",
+                "created",
+                "updated",
+                "category_item_id",
+            ]
+        ]
+
+        transaction_df["transaction_date"] = pd.to_datetime(
+            transaction_df["transaction_date"], format="%m/%d/%y"
+        )
+        transaction_df["created"] = pd.to_datetime(
+            transaction_df["created"], format="%Y-%m-%d %H:%M:%S.%f"
+        )
+        transaction_df["updated"] = pd.to_datetime(
+            transaction_df["updated"], format="%Y-%m-%d %H:%M:%S.%f"
+        )
+
+        grouped_transaction_df = (
+            transaction_df.groupby(["transaction_date"])["amount"].sum().reset_index()
+        )
+
+        fig = go.Figure(
+            data=go.Scatter(
+                x=grouped_transaction_df.transaction_date,
+                y=grouped_transaction_df.amount,
+            )
+        )
+
+        # Set the background color to black
+        fig.update_layout(
+            plot_bgcolor="#1d1d1d",
+            paper_bgcolor="#1d1d1d",
+            font={"color": "white"},
+            title=f"Spending over Period: {state.viz_start_date} - {state.viz_end_date}",
+        )
+
+        ui.plotly(fig)
+    else:
+        ui.label("No Data to Show for the period")

@@ -49,6 +49,42 @@ class Budget(SQLModel, table=True):
         )
         return total_in - total_out
 
+    @property
+    def actual_total_out(self) -> float:
+        total_out = sum(
+            category.actual_total
+            for category in self.categories
+            if category.name != "Income"
+        )
+        return total_out
+
+    @property
+    def actual_total_in(self) -> float:
+        total_in = sum(
+            category.actual_total
+            for category in self.categories
+            if category.name == "Income"
+        )
+        return total_in
+
+    @property
+    def budgeted_total_out(self) -> float:
+        total_out = sum(
+            category.budgeted_total
+            for category in self.categories
+            if category.name != "Income"
+        )
+        return total_out
+
+    @property
+    def budgeted_total_in(self) -> float:
+        total_in = sum(
+            category.budgeted_total
+            for category in self.categories
+            if category.name == "Income"
+        )
+        return total_in
+
     # Define a class method to add the new object to the session
     @classmethod
     def add(cls, session: Session, **kwargs) -> None:

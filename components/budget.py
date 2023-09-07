@@ -1,3 +1,4 @@
+import plotly.graph_objects as go
 from nicegui import ui
 from utils import get_current_month
 from components import state
@@ -66,3 +67,34 @@ def budget_breakdown() -> None:
         ui.label(f"$ {'{:.2f}'.format(budget.budgeted_balance)}").classes("text-bold")
         ui.label(f"$ {'{:.2f}'.format(budget.actual_balance)}").classes("text-bold")
     ui.splitter(horizontal=True)
+
+
+@ui.refreshable
+def budget_guage() -> None:
+    budget = get_budget_data_by_date(
+        1, start_date=state.viz_start_date, end_date=state.viz_end_date
+    )
+
+    fig = go.Figure(
+        go.Indicator(
+            mode="gauge+number+delta",
+            value=budget.actual_total_out,
+            domain={"x": [0, 1], "y": [0, 1]},
+            title={"text": "Total Spending vs Total Income"},
+            delta={"reference": budget.actual_total_in},
+            gauge={
+                "threshold": {
+                    "line": {"color": "red", "width": 4},
+                    "thickness": 0.75,
+                    "value": budget.actual_total_in,
+                },
+            },
+        )
+    )
+
+    # Set the background color to black
+    fig.update_layout(
+        plot_bgcolor="#1d1d1d", paper_bgcolor="#1d1d1d", font={"color": "white"}
+    )
+
+    ui.plotly(fig)
