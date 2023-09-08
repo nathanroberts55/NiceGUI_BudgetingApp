@@ -49,7 +49,9 @@ def transactions_tables_by_category() -> None:
 @ui.refreshable
 def spending_breakdown_chart() -> None:
     budget = get_budget_data_by_date(
-        1, start_date=state.viz_start_date, end_date=state.viz_end_date
+        budget_id=state.viz_budget_id,
+        start_date=state.viz_start_date,
+        end_date=state.viz_end_date,
     )
 
     data = [

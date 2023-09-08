@@ -1,13 +1,7 @@
 from nicegui import app, ui
 import os
 from datetime import datetime
-from components import (
-    transaction,
-    budget,
-    category,
-    category_item,
-    common,
-)
+from components import transaction, budget, category, category_item, common
 import plotly.graph_objects as go
 from database.db import initialize_database, create_sample_data
 
@@ -21,14 +15,17 @@ if not os.path.exists("budget.db"):
 ui.dark_mode().enable()
 
 with ui.tabs().classes("w-full") as tabs:
-    # budget_planning = ui.tab("Budget Planning", icon="edit_document").classes("w-40")
+    budget_planning = ui.tab("Budget Planning", icon="edit_document").classes("w-40")
     budget_report = ui.tab("Budget Reporting", icon="table_view").classes("w-40")
     budget_viz = (
         ui.tab("Budget Visualization", icon="insights")
         # .on("blur", update_data)
         .classes("w-40")
     )
-with ui.tab_panels(tabs, value=budget_viz).classes("w-full"):
+with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
+    with ui.tab_panel(budget_planning):
+        ui.label("Budget Planning Coming Soon!")
+
     with ui.tab_panel(budget_report):
         common.reporting_budget_date_select()
         budget.budget_breakdown()

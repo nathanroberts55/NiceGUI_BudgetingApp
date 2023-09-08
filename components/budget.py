@@ -23,7 +23,9 @@ def create_budget_form() -> None:
 @ui.refreshable
 def budget_breakdown() -> None:
     budget = get_budget_data_by_date(
-        1, start_date=state.reporting_start_date, end_date=state.reporting_end_date
+        budget_id=state.reporting_budget_id,
+        start_date=state.reporting_start_date,
+        end_date=state.reporting_end_date,
     )
     ui.label(budget.name).classes("text-semibold text-3xl my-5")
     with ui.grid(columns=5):
@@ -72,7 +74,9 @@ def budget_breakdown() -> None:
 @ui.refreshable
 def budget_guage() -> None:
     budget = get_budget_data_by_date(
-        1, start_date=state.viz_start_date, end_date=state.viz_end_date
+        budget_id=state.viz_budget_id,
+        start_date=state.viz_start_date,
+        end_date=state.viz_end_date,
     )
 
     fig = go.Figure(
