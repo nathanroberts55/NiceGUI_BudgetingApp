@@ -131,7 +131,6 @@ async def open_edit_dialog() -> None:
 
 
 async def delete_category_item() -> None:
-    pass
     row = await grid.get_selected_row()
 
     if not row:
