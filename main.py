@@ -1,8 +1,4 @@
-from nicegui import app, ui
 import os
-from datetime import datetime
-from components import transaction, budget, category, category_item, common
-import plotly.graph_objects as go
 from database.db import initialize_database, create_sample_data
 
 # Initialize the SQLite Database
@@ -10,6 +6,9 @@ if not os.path.exists("budget.db"):
     print("Database does not exist... Creating Database")
     initialize_database()
     create_sample_data()
+
+from nicegui import app, ui
+from components import transaction, budget, category, category_item, common
 
 
 ui.dark_mode().enable()

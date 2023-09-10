@@ -19,6 +19,7 @@ session = Session(engine)
 
 
 def initialize_database() -> None:
+    print("Initializing Database...")
     SQLModel.metadata.create_all(engine)
 
 
@@ -46,6 +47,7 @@ def initialize_budget(name: str) -> None:
 
 
 def create_sample_data() -> None:
+    print("Creating Sample Data...")
     with session:
         okay("Creating Budget Record")
         budget = Budget(name="My First Budget")
@@ -296,10 +298,21 @@ def update_budget_by_id(
         budget = session.exec(select(Budget).where(Budget.id == budget_id)).first()
 
         budget.name = name
+        budget.updated = datetime.utcnow()
 
         session.add(budget)
         session.commit()
         session.refresh(budget)
+
+
+def delete_budget_by_id(
+    budget_id: int,
+) -> None:
+    with session:
+        budget = session.exec(select(Budget).where(Budget.id == budget_id)).one()
+
+        session.delete(budget)
+        session.commit()
 
 
 def get_all_categories() -> List[Category]:

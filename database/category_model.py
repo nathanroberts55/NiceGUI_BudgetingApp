@@ -1,5 +1,18 @@
 from typing import Optional, List, TYPE_CHECKING
-from sqlmodel import SQLModel, Session, Field, Relationship
+from datetime import datetime
+from sqlmodel import SQLModel, Session, Column, ForeignKey, Integer, Field, Relationship
+from sqlalchemy.engine import Engine
+from sqlalchemy import event
+from sqlite3 import Connection as SQLite3Connection
+
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    if isinstance(dbapi_connection, SQLite3Connection):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
 
 # For Cascading Deletes | https://github.com/tiangolo/sqlmodel/issues/213
 
@@ -11,14 +24,20 @@ if TYPE_CHECKING:
 class Category(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str = None
+    created: datetime = Field(default=datetime.utcnow())
+    updated: datetime = Field(default=datetime.utcnow())
 
     # Relationship to Budget
-    budget_id: Optional[int] = Field(default=None, foreign_key="budget.id")
+    budget_id: Optional[int] = Field(
+        default=None,
+        foreign_key="budget.id",
+        sa_column=Column(Integer, ForeignKey("budget.id", ondelete="CASCADE")),
+    )
     budget: Optional["Budget"] = Relationship(back_populates="categories")
 
     # Relationship to Category Item
     category_items: Optional[List["CategoryItem"]] = Relationship(
-        back_populates="category"
+        sa_relationship_kwargs={"cascade": "all, delete"}, back_populates="category"
     )
 
     # Calculated Columns
