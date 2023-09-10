@@ -1,6 +1,7 @@
 from typing import Optional, List, TYPE_CHECKING
 from sqlmodel import SQLModel, Session, Field, Relationship
 
+# For Cascading Deletes | https://github.com/tiangolo/sqlmodel/issues/213
 
 if TYPE_CHECKING:
     from .budget_model import Budget
@@ -49,18 +50,20 @@ class Category(SQLModel, table=True):
     # Define a class method to save the new object to the database
     @classmethod
     def add(cls, session: Session, **kwargs) -> "Category":
-        category = cls(**kwargs)
-        session.add(category)
-        return category
+        with session:
+            category = cls(**kwargs)
+            session.add(category)
+            return category
 
     # Define a class method to save the new object to the database
     @classmethod
     def create(cls, session: Session, **kwargs) -> "Category":
-        category = cls(**kwargs)
-        session.add(category)
-        session.commit()
-        category = session.refresh()
-        return category
+        with session:
+            category = cls(**kwargs)
+            session.add(category)
+            session.commit()
+            session.refresh(category)
+            return category
 
 
 # region Future Feature

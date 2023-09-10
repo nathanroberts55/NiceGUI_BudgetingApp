@@ -17,14 +17,10 @@ ui.dark_mode().enable()
 with ui.tabs().classes("w-full") as tabs:
     budget_planning = ui.tab("Budget Planning", icon="edit_document").classes("w-40")
     budget_report = ui.tab("Budget Reporting", icon="table_view").classes("w-40")
-    budget_viz = (
-        ui.tab("Budget Visualization", icon="insights")
-        # .on("blur", update_data)
-        .classes("w-40")
-    )
-with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
+    budget_viz = ui.tab("Budget Visualization", icon="insights").classes("w-40")
+with ui.tab_panels(tabs, value=budget_planning).classes("w-full"):
     with ui.tab_panel(budget_planning):
-        ui.label("Budget Planning Coming Soon!")
+        budget.budget_grid()
 
     with ui.tab_panel(budget_report):
         common.reporting_budget_date_select()

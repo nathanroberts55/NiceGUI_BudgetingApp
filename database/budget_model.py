@@ -88,15 +88,16 @@ class Budget(SQLModel, table=True):
     # Define a class method to add the new object to the session
     @classmethod
     def add(cls, session: Session, **kwargs) -> None:
-        budget = cls(**kwargs)
-        session.add(budget)
-        return budget
+        with session:
+            budget = cls(**kwargs)
+            session.add(budget)
+            return budget
 
-    # Define a class method to create the new object and return it to the user
     @classmethod
-    def create(cls, session: Session, **kwargs) -> None:
-        budget = cls(**kwargs)
-        session.add(budget)
-        session.commit()
-        budget = session.refresh()
-        return budget
+    def create(cls, session: Session, **kwargs) -> "Budget":
+        with session:
+            budget = cls(**kwargs)
+            session.add(budget)
+            session.commit()
+            session.refresh(budget)
+            return budget

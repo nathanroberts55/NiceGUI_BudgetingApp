@@ -48,13 +48,13 @@ def reporting_budget_date_select() -> None:
         # Refresh Button
         ui.button(
             "Refresh",
-            on_click=lambda: reporting_date_select_onclick(
+            on_click=lambda: reporting_refresh(
                 start_date=start_date, end_date=end_date, budget_id=budget_select
             ),
         )
 
 
-def reporting_date_select_onclick(
+def reporting_refresh(
     start_date: ui.date, end_date: ui.date, budget_id: ui.select
 ) -> None:
     state.reporting_start_date = start_date.value
@@ -103,15 +103,13 @@ def viz_budget_date_select() -> None:
         # Refresh Button
         ui.button(
             "Refresh",
-            on_click=lambda: viz_date_select_onclick(
+            on_click=lambda: viz_refresh(
                 start_date=start_date, end_date=end_date, budget_id=budget_select
             ),
         )
 
 
-def viz_date_select_onclick(
-    start_date: ui.date, end_date: ui.date, budget_id: ui.select
-) -> None:
+def viz_refresh(start_date: ui.date, end_date: ui.date, budget_id: ui.select) -> None:
     state.viz_start_date = start_date.value
     state.viz_end_date = end_date.value
     state.viz_budget_id = budget_id.value

@@ -12,12 +12,6 @@ from database.db import (
 from constants import TRANSACTION_COLUMNS
 
 
-def category_list() -> None:
-    categories = get_all_categories()
-    for category in categories:
-        ui.label(category.name)
-
-
 @ui.refreshable
 def transactions_tables_by_category() -> None:
     category_ids = [category.id for category in get_all_categories()]

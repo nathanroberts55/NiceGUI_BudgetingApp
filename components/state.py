@@ -10,3 +10,4 @@ viz_budget_id: int = None
 
 selected_transaction: list = []
 selected_category_item: list = []
+selected_budget: list = []

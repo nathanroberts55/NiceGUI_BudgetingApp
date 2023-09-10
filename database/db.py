@@ -22,19 +22,27 @@ def initialize_database() -> None:
     SQLModel.metadata.create_all(engine)
 
 
-def initialize_budget() -> None:
+def initialize_budget(name: str) -> None:
     # Current Date to be used in the default Budget Name
-    current_date = datetime.now().strftime("%m/%d/%Y")
+    # current_date = datetime.now().strftime("%m/%d/%Y")
 
     # Create a Budget
-    budget: Budget = Budget.create(name=f"Budget | {current_date}")
+    budget: Budget = Budget.create(session=session, name=name)
 
     # Create the default categories
-    income: Category = Category.create(name="Income", budget_id=budget.id)
-    expense: Category = Category.create(name="Expense", budget_id=budget.id)
-    spending: Category = Category.create(name="Spending", budget_id=budget.id)
-    debt: Category = Category.create(name="Debt", budget_id=budget.id)
-    saving: Category = Category.create(name="Saving", budget_id=budget.id)
+    income: Category = Category.create(
+        session=session, name="Income", budget_id=budget.id
+    )
+    expense: Category = Category.create(
+        session=session, name="Expense", budget_id=budget.id
+    )
+    spending: Category = Category.create(
+        session=session, name="Spending", budget_id=budget.id
+    )
+    debt: Category = Category.create(session=session, name="Debt", budget_id=budget.id)
+    saving: Category = Category.create(
+        session=session, name="Saving", budget_id=budget.id
+    )
 
 
 def create_sample_data() -> None:
@@ -264,6 +272,34 @@ def get_budget_by_name(budget_name) -> Budget:
     with session:
         budget = session.exec(select(Budget).where(Budget.name == budget_name)).first()
     return budget
+
+
+def get_budget_by_id(budget_id: int) -> Budget:
+    """_summary_
+
+    Args:
+        budget_id (int): id of the Budget to be searched for
+
+    Returns:
+        Budget: First Budget object returned from database
+    """
+    with session:
+        budget = session.exec(select(Budget).where(Budget.id == budget_id)).first()
+    return budget
+
+
+def update_budget_by_id(
+    budget_id: int,
+    name: str,
+) -> None:
+    with session:
+        budget = session.exec(select(Budget).where(Budget.id == budget_id)).first()
+
+        budget.name = name
+
+        session.add(budget)
+        session.commit()
+        session.refresh(budget)
 
 
 def get_all_categories() -> List[Category]:
