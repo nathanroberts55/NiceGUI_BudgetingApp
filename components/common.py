@@ -3,6 +3,7 @@ from components.budget import budget_breakdown, budget_guage
 from components.category import (
     transactions_tables_by_category,
     spending_breakdown_chart,
+    category_treemap,
 )
 from components.transaction import transaction_grid, transactions_over_time_chart
 from database.db import get_all_budgets
@@ -129,3 +130,4 @@ def viz_refresh(start_date: ui.date, end_date: ui.date, budget_id: ui.select) ->
     transactions_over_time_chart.refresh()
     budget_guage.refresh()
     spending_breakdown_chart.refresh()
+    category_treemap.refresh()

@@ -121,3 +121,83 @@ def spending_breakdown_chart() -> None:
             )
 
             ui.plotly(fig)
+
+
+@ui.refreshable
+def category_treemap() -> None:
+    if not get_all_budgets():
+        ui.label("No Budget Data")
+    else:
+        budget = get_budget_data_by_date(
+            budget_id=state.viz_budget_id,
+            start_date=state.viz_start_date,
+            end_date=state.viz_end_date,
+        )
+        category_items = [
+            category_item
+            for category in budget.categories
+            for category_item in category.category_items
+        ]
+        categories_dict = {category.id: category.name for category in budget.categories}
+
+        # List of Category Items to use in the Treemap
+        category_items_list = [
+            {
+                "id": category_item.id,
+                "label": category_item.name,
+                "budgeted": category_item.budgeted,
+                "actual": category_item.actual,
+                "parent": categories_dict.get(category_item.category_id),
+            }
+            for category_item in category_items
+        ]
+
+        # Creating the root node of the treemap
+        category_items_list.insert(
+            0,
+            {
+                "id": "Category",
+                "label": budget.name,
+                "budgeted": None,
+                "actual": 0.0,
+                "parent": None,
+            },
+        )
+
+        # Creating the parents of the category items (the categories they belong to) and nesting them in the budget
+        for category in budget.categories:
+            category_items_list.insert(
+                1,
+                {
+                    "id": category.name,
+                    "label": category.name,
+                    "budgeted": None,
+                    "actual": 0.0,
+                    "parent": "Category",
+                },
+            )
+
+        # Convert data into dataframe
+        category_items_df = pd.DataFrame(category_items_list)
+
+        fig = go.Figure(
+            go.Treemap(
+                ids=category_items_df.id,
+                labels=category_items_df.label,
+                parents=category_items_df.parent,
+                values=category_items_df.actual,
+                root_color="lightgrey",
+                maxdepth=3,
+            )
+        )
+
+        # Set the background color to black
+        fig.update_layout(
+            plot_bgcolor="#1d1d1d",
+            paper_bgcolor="#1d1d1d",
+            font={"color": "white"},
+            title=f"Budget Composition: {state.viz_start_date} - {state.viz_end_date}",
+            margin=dict(t=50, l=50, r=50, b=50),
+        )
+
+        ui.plotly(fig)

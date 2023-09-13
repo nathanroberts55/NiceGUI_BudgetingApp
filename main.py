@@ -32,5 +32,6 @@ with ui.tab_panels(tabs, value=budget_planning).classes("w-full"):
         budget.budget_guage()
         transaction.transactions_over_time_chart()
         category.spending_breakdown_chart()
+        category.category_treemap()
 
 ui.run(title="Budgeting App", favicon="assets\\budgeting.png")
