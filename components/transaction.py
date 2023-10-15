@@ -14,8 +14,24 @@ from database.db import (
 from components import state, budget
 from constants import TRANSACTION_COLUMNS, RECURRING_OPTIONS
 
-category_item_select: ui.select = None
+# add_category_item: ui.select = None
+# edit_category_item: ui.select = None
 grid: ui.aggrid = None
+
+
+@ui.refreshable
+def category_select_ui() -> None:
+    ui.select(
+        {
+            category_item.id: category_item.name
+            for category_item in sorted(
+                get_all_category_items(), key=lambda data: data.name
+            )
+        },
+        value="Select a Category",
+        label="Category Item",
+        on_change=lambda e: ui.notify(e.value),
+    ).classes("w-full")
 
 
 def add_transaction() -> None:
@@ -23,7 +39,7 @@ def add_transaction() -> None:
         name=add_transaction_name.value,
         transaction_date=add_transaction_date.value,
         amount=f"{float(add_transaction_amount.value):.2f}",
-        category_item_name=add_category_item.value,
+        category_item_id=add_category_item.value,
     )
 
     grid.options["rowData"] = sorted(
@@ -54,7 +70,7 @@ def update_transaction() -> None:
         name=edit_transaction_name.value,
         transaction_date=edit_transaction_date.value,
         amount=f"{float(edit_transaction_amount.value):.2f}",
-        category_item_name=edit_category_item.value,
+        category_item_id=edit_category_item.value,
     )
 
     grid.options["rowData"] = sorted(
@@ -114,7 +130,7 @@ async def open_edit_dialog() -> None:
         state.selected_transaction["category_item_id"]
     )
 
-    edit_category_item.set_value(category_item.name)
+    edit_category_item.set_value(category_item.id)
     edit_transaction_name.set_value(state.selected_transaction["name"])
     edit_transaction_date.set_value(state.selected_transaction["transaction_date"])
     edit_transaction_amount.set_value(state.selected_transaction["amount"])
@@ -124,12 +140,19 @@ async def open_edit_dialog() -> None:
 
 with ui.dialog() as add_dialog:
     with ui.card():
-        category_items = sorted(get_all_category_items(), key=lambda data: data.name)
         add_category_item = ui.select(
-            [category_item.name for category_item in category_items],
+            {
+                category_item.id: category_item.name
+                for category_item in sorted(
+                    get_all_category_items(), key=lambda data: data.name
+                )
+            },
             value="Select a Category",
+            label="Category Item",
+            on_change=lambda e: ui.notify(e.value),
         ).classes("w-full")
         add_transaction_name = ui.input(
+            label="Transaction Name",
             placeholder="Example: Taco Bell",
         ).classes("w-full")
         with ui.input("Transaction Date").classes(
@@ -143,6 +166,7 @@ with ui.dialog() as add_dialog:
                 )
         add_transaction_amount = (
             ui.number(
+                label="Transaction Amount",
                 placeholder="Example: 400.00",
                 format="%.2f",
             )
@@ -200,15 +224,25 @@ with ui.dialog() as add_dialog:
         #     .classes("m-auto w-full")
         # )
         # endregion Recurring Transaction
-        ui.button("Save New Transaction", on_click=add_transaction).classes("m-auto")
+        ui.button(
+            "Save New Transaction",
+            on_click=lambda: (add_transaction(), add_dialog.update()),
+        ).classes("m-auto")
 
 with ui.dialog() as edit_dialog:
     with ui.card():
-        category_items = sorted(get_all_category_items(), key=lambda data: data.name)
         edit_category_item = ui.select(
-            [category_item.name for category_item in category_items],
+            {
+                category_item.id: category_item.name
+                for category_item in sorted(
+                    get_all_category_items(), key=lambda data: data.name
+                )
+            },
+            value="Select a Category",
+            label="Category Item",
+            on_change=lambda e: ui.notify(e.value),
         ).classes("w-full")
-        edit_transaction_name = ui.input().classes("w-full")
+        edit_transaction_name = ui.input(label="Transaction Name").classes("w-full")
         with ui.input("Transaction Date").classes(
             "w-full m-auto"
         ) as edit_transaction_date:
@@ -220,6 +254,7 @@ with ui.dialog() as edit_dialog:
                 )
         edit_transaction_amount = (
             ui.number(
+                label="Transaction Amount",
                 format="%.2f",
             )
             .classes("w-full m-auto")
@@ -228,24 +263,10 @@ with ui.dialog() as edit_dialog:
                 lambda: edit_transaction_amount.update(),
             )
         )
-        ui.button("Edit Transaction", on_click=update_transaction).classes("m-auto")
-
-
-@ui.refreshable
-def transactions_tables() -> None:
-    transactions = get_all_transactions()
-    transactions_list = to_dict(transactions)
-
-    ui.label("Transaction Table").classes("text-4xl my-5")
-    if transactions:
-        ui.table(
-            columns=TRANSACTION_COLUMNS, rows=transactions_list, row_key="name"
-        ).classes("mb-10")
-        ui.label(
-            f"Total Transaction Volume: ${'{:.2f}'.format(sum(float(transaction.amount) for transaction in transactions))}"
-        ).classes("text-right")
-    else:
-        ui.label("No Income to Show").classes("text-semibold text-xl")
+        ui.button(
+            "Edit Transaction",
+            on_click=lambda: (update_transaction(), edit_dialog.update()),
+        ).classes("m-auto")
 
 
 @ui.refreshable
@@ -307,7 +328,7 @@ def transactions_over_time_chart() -> None:
     transactions = [
         transaction
         for transaction in transactions
-        if transaction.category_item_id not in [1, 9, 10]  # Exclude Income Sources
+        if transaction.category_item_id not in [1, 2, 3]  # Exclude Income Sources
     ]
 
     transaction_df = pd.DataFrame(to_dict(transactions))

@@ -37,7 +37,8 @@ class Category(SQLModel, table=True):
 
     # Relationship to Category Item
     category_items: Optional[List["CategoryItem"]] = Relationship(
-        sa_relationship_kwargs={"cascade": "all, delete"}, back_populates="category"
+        back_populates="category",
+        sa_relationship_kwargs={"cascade": "all"},
     )
 
     # Calculated Columns

@@ -34,7 +34,6 @@ class Transaction(SQLModel, table=True):
     )
     category_item: Optional["CategoryItem"] = Relationship(
         back_populates="transactions",
-        sa_relationship_kwargs={"cascade": "all, delete"},
     )
 
     # Define a class method to save the new object to the database

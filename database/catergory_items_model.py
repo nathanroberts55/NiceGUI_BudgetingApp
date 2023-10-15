@@ -35,12 +35,11 @@ class CategoryItem(SQLModel, table=True):
     )
     category: Optional["Category"] = Relationship(
         back_populates="category_items",
-        sa_relationship_kwargs={"cascade": "all, delete"},
     )
     # Relationship to Transaction
     transactions: Optional[List["Transaction"]] = Relationship(
         back_populates="category_item",
-        sa_relationship_kwargs={"cascade": "all, delete"},
+        sa_relationship_kwargs={"cascade": "all"},
     )
 
     # Calculated Columns
@@ -64,7 +63,10 @@ class CategoryItem(SQLModel, table=True):
 
     # Define a class method to save the new object to the database
     @classmethod
-    def add(cls, session: Session, **kwargs) -> "CategoryItem":
-        category_item = cls(**kwargs)
-        session.add(category_item)
-        return category_item
+    def create(cls, session: Session, **kwargs) -> "CategoryItem":
+        with session:
+            category_item = cls(**kwargs)
+            session.add(category_item)
+            session.commit()
+            session.refresh(category_item)
+            return category_item

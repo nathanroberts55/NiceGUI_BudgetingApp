@@ -229,13 +229,39 @@ def budget_breakdown() -> None:
                     )(category.over_under)
                 ).classes("text-bold")
             ui.splitter(horizontal=True)
-        ui.splitter(horizontal=True).classes("mt-2")
+            if category.name == "Income":
+                with ui.grid(columns=5):
+                    ui.label("TOTAL IN").classes("text-bold ml-20 text-emerald-400")
+                    ui.label(f"$ {'{:.2f}'.format(budget.budgeted_total_in)}").classes(
+                        "text-bold text-emerald-400"
+                    )
+                    ui.label(f"$ {'{:.2f}'.format(budget.actual_total_in)}").classes(
+                        "text-bold text-emerald-400"
+                    )
+                ui.splitter(horizontal=True)
         with ui.grid(columns=5):
-            ui.label("Budget Total Balance").classes("text-bold ml-20")
-            ui.label(f"$ {'{:.2f}'.format(budget.budgeted_balance)}").classes(
-                "text-bold"
+            ui.label("TOTAL OUT").classes("text-bold ml-20 text-red-400")
+            ui.label(f"$ {'{:.2f}'.format(budget.budgeted_total_out)}").classes(
+                "text-bold text-red-400"
             )
-            ui.label(f"$ {'{:.2f}'.format(budget.actual_balance)}").classes("text-bold")
+            ui.label(f"$ {'{:.2f}'.format(budget.actual_total_out)}").classes(
+                "text-bold text-red-400"
+            )
+        ui.splitter(horizontal=True)
+        budgeted_total_color = (
+            "text-emerald-400" if budget.budgeted_balance >= 0 else "text-red-400"
+        )
+        actual_total_color = (
+            "text-emerald-400" if budget.actual_balance >= 0 else "text-red-400"
+        )
+        with ui.grid(columns=5):
+            ui.label("Budget Total Balance").classes("text-bold ml-20 text-stone-100")
+            ui.label(f"$ {'{:.2f}'.format(budget.budgeted_balance)}").classes(
+                f"text-bold {budgeted_total_color}"
+            )
+            ui.label(f"$ {'{:.2f}'.format(budget.actual_balance)}").classes(
+                f"text-bold {actual_total_color}"
+            )
         ui.splitter(horizontal=True)
 
 
@@ -256,7 +282,11 @@ def budget_guage() -> None:
                 value=budget.actual_total_out,
                 domain={"x": [0, 1], "y": [0, 1]},
                 title={"text": "Total Spending vs Total Income"},
-                delta={"reference": budget.actual_total_in},
+                delta={
+                    "reference": budget.actual_total_in,
+                    "increasing": {"color": "red"},
+                    "decreasing": {"color": "green"},
+                },
                 gauge={
                     "threshold": {
                         "line": {"color": "red", "width": 4},

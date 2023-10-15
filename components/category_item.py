@@ -1,6 +1,6 @@
 from nicegui import ui
 from utils import enable_next, to_dict
-from components import budget, state
+from components import budget, transaction, state
 from database.db import (
     get_all_category_items,
     delete_category_item_by_id,
@@ -40,6 +40,7 @@ def add_category_item() -> None:
 
     grid.update()
     budget.budget_breakdown.refresh()
+    transaction.category_select_ui.refresh()
 
 
 def update_category_item() -> None:
@@ -60,6 +61,7 @@ def update_category_item() -> None:
     edit_dialog.close()
     grid.update()
     budget.budget_breakdown.refresh()
+    transaction.category_select_ui.refresh()
 
 
 with ui.dialog() as add_dialog:
@@ -146,6 +148,8 @@ async def delete_category_item() -> None:
 
     grid.update()
     budget.budget_breakdown.refresh()
+    transaction.transaction_grid.refresh()
+    transaction.category_select_ui.refresh()
 
     ui.notify(f"Successfully Deleted {row['name']}", color="Red")
 

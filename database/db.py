@@ -106,94 +106,103 @@ def create_sample_data() -> None:
         warn("Category | Saving ID:", saving_id)
 
         okay("Creating Category Items")
-        job_income = CategoryItem(
-            name="Uber Paycheck", budgeted="4500.00", category_id=income_id
+        # Income
+        msft_1 = CategoryItem.create(
+            session=session,
+            name="MSFT Paycheck 1",
+            budgeted="2677.58",
+            category_id=income_id,
         )
-        rent = CategoryItem(name="Rent", budgeted="800.00", category_id=expense_id)
-        groceries = CategoryItem(
-            name="Groceries", budgeted="300.00", category_id=expense_id
+        msft_2 = CategoryItem.create(
+            session=session,
+            name="MSFT Paycheck 2",
+            budgeted="2677.58",
+            category_id=income_id,
         )
-        credit_card = CategoryItem(
-            name="Chase Credit Card", budgeted="300.00", category_id=debt_id
+        msft_2 = CategoryItem.create(
+            session=session, name="Misc. Income", budgeted="0.00", category_id=income_id
         )
-        credit_union = CategoryItem(
-            name="Mission FCU", budgeted="500.00", category_id=saving_id
+        # Expenses
+        phone = CategoryItem.create(
+            session=session, name="Phone", budgeted="80.00", category_id=expense_id
+        )
+        rent = CategoryItem.create(
+            session=session, name="Rent", budgeted="1750.00", category_id=expense_id
+        )
+        gas = CategoryItem.create(
+            session=session, name="Gas", budgeted="150.00", category_id=expense_id
+        )
+        yt_prem = CategoryItem.create(
+            session=session,
+            name="Youtube Premium",
+            budgeted="11.99",
+            category_id=expense_id,
+        )
+        adobe = CategoryItem.create(
+            session=session, name="Adobe", budgeted="9.99", category_id=expense_id
+        )
+        disney = CategoryItem.create(
+            session=session, name="Disney+", budgeted="9.99", category_id=expense_id
+        )
+        car_insurance = CategoryItem.create(
+            session=session,
+            name="Car Insurance",
+            budgeted="0.00",
+            category_id=expense_id,
+        )
+        utilities = CategoryItem.create(
+            session=session, name="Utilities", budgeted="200.00", category_id=expense_id
+        )
+        groceries = CategoryItem.create(
+            session=session, name="Groceries", budgeted="350.00", category_id=expense_id
+        )
+        rental_insurance = CategoryItem.create(
+            session=session,
+            name="Rental Insurance",
+            budgeted="0.00",
+            category_id=expense_id,
+        )
+        misc_expenses = CategoryItem.create(
+            session=session,
+            name="Misc. Expenses",
+            budgeted="20.00",
+            category_id=expense_id,
+        )
+        # Spending
+        entertainment = CategoryItem.create(
+            session=session,
+            name="Entertainment",
+            budgeted="450.00",
+            category_id=spending_id,
+        )
+        dining_out = CategoryItem.create(
+            session=session,
+            name="Dining Out",
+            budgeted="250.00",
+            category_id=spending_id,
+        )
+        misc_spending = CategoryItem.create(
+            session=session,
+            name="Misc. Spending",
+            budgeted="450.00",
+            category_id=spending_id,
         )
 
-        session.add(job_income)
-        session.add(rent)
-        session.add(groceries)
-        session.add(credit_card)
-        session.add(credit_union)
-        okay("Saving Category Items")
-        session.commit()
-        okay("Saved Category Items")
+        # Debt
 
-        okay("Getting the ID's for the 5 category items created")
-        job_income_id = (
-            session.exec(
-                select(CategoryItem).where(CategoryItem.name == "Uber Paycheck")
-            )
-            .first()
-            .id
+        # Saving
+        ira = CategoryItem.create(
+            session=session, name="Roth IRA", budgeted="400.00", category_id=saving_id
         )
-        rent_id = (
-            session.exec(select(CategoryItem).where(CategoryItem.name == "Rent"))
-            .first()
-            .id
+        savings = CategoryItem.create(
+            session=session, name="Savings", budgeted="800.00", category_id=saving_id
         )
-        groceries_id = (
-            session.exec(select(CategoryItem).where(CategoryItem.name == "Groceries"))
-            .first()
-            .id
+        investments = CategoryItem.create(
+            session=session,
+            name="Investments",
+            budgeted="800.00",
+            category_id=saving_id,
         )
-        credit_card_id = (
-            session.exec(
-                select(CategoryItem).where(CategoryItem.name == "Chase Credit Card")
-            )
-            .first()
-            .id
-        )
-        credit_union_id = (
-            session.exec(select(CategoryItem).where(CategoryItem.name == "Mission FCU"))
-            .first()
-            .id
-        )
-
-        okay("Collected the Category Item Id's")
-        warn("CategoryItem | Job Income ID:", job_income_id)
-        warn("CategoryItem | Rent ID:", rent_id)
-        warn("CategoryItem | Groceries ID:", groceries_id)
-        warn("CategoryItem | Chase Credit Card ID:", credit_card_id)
-        warn("CategoryItem | Mission FCU ID:", credit_union_id)
-
-        # Creating some sample transactions
-        for transaction in range(0, 100):
-            # Get the current date
-            today = datetime.now()
-
-            # Define the range of days to choose from
-            days_range = 365
-
-            # Generate a random number of days within the range
-            random_days = random.randint(0, days_range)
-
-            # Subtract the random number of days from today to get a random date before today
-            random_date = today - timedelta(days=random_days)
-
-            cat_item_id = (transaction % 5) + 1
-            okay("Creating New Transaction, #", transaction)
-            Transaction.add(
-                session=session,
-                name=f"Test Source: {transaction}",
-                transaction_date=random_date.strftime("%m/%d/%y"),
-                amount=generate_random_float(),
-                category_item_id=cat_item_id,
-            )
-            okay("Saving New Transaction, #", transaction)
-            session.commit()
-            okay("Saved New Transaction, #", transaction)
-        okay("All Transactions Created!")
 
 
 def get_all_budgets() -> List[Budget]:
@@ -398,7 +407,7 @@ def get_category_items_with_related_data(category_item_id: int) -> CategoryItem:
     with session:
         # Get the category_item with the given id
         category_item = session.get(CategoryItem, category_item_id)
-        # Access the transactions relationship attribute to get the related trnasactions
+        # Access the transactions relationship attribute to get the related transactions
         transactions = category_item.transactions
         return category_item
 
@@ -454,21 +463,17 @@ def update_transaction_by_id(
     name: str,
     transaction_date: str,
     amount: str,
-    category_item_name: str,
+    category_item_id: int,
 ) -> None:
     with session:
         transaction = session.exec(
             select(Transaction).where(Transaction.id == transaction_id)
         ).first()
 
-        category_item = session.exec(
-            select(CategoryItem).where(CategoryItem.name == category_item_name)
-        ).first()
-
         transaction.name = name
         transaction.transaction_date = transaction_date
         transaction.amount = amount
-        transaction.category_item_id = category_item.id
+        transaction.category_item_id = category_item_id
         transaction.updated = datetime.utcnow()
 
         session.add(transaction)
@@ -526,14 +531,12 @@ def create_category_item(name: str, category_name: str, budgeted_amount: str) ->
             select(Category).where(Category.name == category_name)
         ).first()
 
-        new_item = CategoryItem.add(
+        new_item = CategoryItem.create(
             session=session,
             name=name,
             budgeted=budgeted_amount,
             category_id=category.id,
         )
-        session.commit()
-        session.refresh(new_item)
 
 
 def update_category_item_by_id(
@@ -574,7 +577,7 @@ def create_transaction(
     name: str,
     transaction_date: str,
     amount: str,
-    category_item_name: str,
+    category_item_id: int,
 ) -> None:
     """Function to save transaction to the database
 
@@ -586,14 +589,14 @@ def create_transaction(
     """
 
     with session:
-        category_item: CategoryItem = session.exec(
-            select(CategoryItem).where(CategoryItem.name == category_item_name)
-        ).first()
+        # category_item: CategoryItem = session.exec(
+        #     select(CategoryItem).where(CategoryItem.name == category_item_name)
+        # ).first()
 
         transaction = Transaction(
             name=name,
             transaction_date=transaction_date,
-            category_item_id=category_item.id,
+            category_item_id=category_item_id,
             amount=amount,
         )
         session.add(transaction)

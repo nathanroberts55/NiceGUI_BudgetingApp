@@ -1,7 +1,6 @@
 from nicegui import ui
 from components.budget import budget_breakdown, budget_guage
 from components.category import (
-    transactions_tables_by_category,
     spending_breakdown_chart,
     category_treemap,
 )

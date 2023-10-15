@@ -27,7 +27,6 @@ class Budget(SQLModel, table=True):
     # Relationship to Category
     categories: Optional[List["Category"]] = Relationship(
         back_populates="",
-        sa_relationship_kwargs={"cascade": "all, delete"},
     )
 
     @property
