@@ -5,4 +5,6 @@ DEBUG = True
 
 # Tracking the version number
 # Increment whenever the app is built
-VERSION = "0.0.1"
+MAJOR_VERSION = 0
+MINOR_VERSION = 0
+PATCH_VERSION = 2

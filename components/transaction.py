@@ -149,7 +149,6 @@ with ui.dialog() as add_dialog:
             },
             value="Select a Category",
             label="Category Item",
-            on_change=lambda e: ui.notify(e.value),
         ).classes("w-full")
         add_transaction_name = ui.input(
             label="Transaction Name",
@@ -240,7 +239,6 @@ with ui.dialog() as edit_dialog:
             },
             value="Select a Category",
             label="Category Item",
-            on_change=lambda e: ui.notify(e.value),
         ).classes("w-full")
         edit_transaction_name = ui.input(label="Transaction Name").classes("w-full")
         with ui.input("Transaction Date").classes(
