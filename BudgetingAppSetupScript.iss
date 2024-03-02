@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Budgeting App"
-#define MyAppVersion "0.0.1"
+#define MyAppVersion "0.0.2"
 #define MyAppPublisher "Nate Roberts Tech"
 #define MyAppURL "https://www.NateRobertsTech.com/"
 #define MyAppExeName "BudgetingApp.exe"
@@ -24,7 +24,7 @@ LicenseFile=C:\Users\Owner\src\budgettrackingapp\license.txt
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=C:\Users\Owner\src\budgettrackingapp
-OutputBaseFilename=BudgetingApp-Setup-0.0.1
+OutputBaseFilename=BudgetingApp-Setup-0.0.2
 SetupIconFile=C:\Users\Owner\src\budgettrackingapp\assets\budgeting.ico
 Compression=lzma
 SolidCompression=yes
