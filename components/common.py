@@ -24,9 +24,9 @@ def reporting_budget_date_select() -> None:
         budget_dict = {budget.id: budget.name for budget in get_all_budgets()}
         budget_select = ui.select(
             budget_dict,
-            value=list(budget_dict.keys())[0]
-            if budget_dict
-            else "No Budgets to Select",
+            value=(
+                list(budget_dict.keys())[0] if budget_dict else "No Budgets to Select"
+            ),
             label="Budget",
         ).classes("w-1/4 m-auto")
         # Start Date
@@ -70,7 +70,6 @@ def reporting_refresh(
     state.reporting_end_date = end_date.value
     state.reporting_budget_id = budget_id.value
     budget_breakdown.refresh()
-    transactions_tables_by_category.refresh()
     transaction_grid.refresh()
 
 
@@ -83,9 +82,9 @@ def viz_budget_date_select() -> None:
         budget_dict = {budget.id: budget.name for budget in get_all_budgets()}
         budget_select = ui.select(
             budget_dict,
-            value=list(budget_dict.keys())[0]
-            if budget_dict
-            else "No Budgets to Select",
+            value=(
+                list(budget_dict.keys())[0] if budget_dict else "No Budgets to Select"
+            ),
             label="Budget",
         ).classes("w-1/4 m-auto")
         # Start Date
