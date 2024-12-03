@@ -1,5 +1,5 @@
 from typing import Optional, List, TYPE_CHECKING
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlmodel import SQLModel, Session, Column, Integer, ForeignKey, Field, Relationship
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
@@ -21,8 +21,8 @@ if TYPE_CHECKING:
 
 class CategoryItem(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    created: datetime = Field(default=datetime.utcnow())
-    updated: datetime = Field(default=datetime.utcnow())
+    created: datetime = Field(default=datetime.now(timezone.utc))
+    updated: datetime = Field(default=datetime.now(timezone.utc))
     name: str = None
     budgeted: str = "0.00"
     over_under: float = None

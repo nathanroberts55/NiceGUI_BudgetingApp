@@ -41,6 +41,7 @@ def add_category_item() -> None:
     grid.update()
     budget.budget_breakdown.refresh()
     transaction.category_select_ui.refresh()
+    category_item_grid.refresh()
 
 
 def update_category_item() -> None:
@@ -62,6 +63,7 @@ def update_category_item() -> None:
     grid.update()
     budget.budget_breakdown.refresh()
     transaction.category_select_ui.refresh()
+    category_item_grid.refresh()
 
 
 with ui.dialog() as add_dialog:
@@ -150,6 +152,7 @@ async def delete_category_item() -> None:
     budget.budget_breakdown.refresh()
     transaction.transaction_grid.refresh()
     transaction.category_select_ui.refresh()
+    category_item_grid.refresh()
 
     ui.notify(f"Successfully Deleted {row['name']}", color="Red")
 

@@ -2,7 +2,7 @@ from nicegui import ui
 import pandas as pd
 import random
 from typing import List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from utils import okay, warn, error, generate_random_float, parse_date, to_dict
 from sqlmodel import SQLModel, Session, create_engine, select, cast, DateTime
 from .budget_model import Budget
@@ -249,6 +249,9 @@ def get_budget_data_by_date(budget_id: int, start_date: str, end_date: str) -> B
     :return: A Budget object with filtered transactions.
     :rtype: Budget
     """
+    # Convert start_date and end_date to datetime objects
+    start_date_dt = datetime.strptime(start_date, "%m/%d/%y")
+    end_date_dt = datetime.strptime(end_date, "%m/%d/%y")
 
     with session:
         # Get the budget with the given id
@@ -260,13 +263,15 @@ def get_budget_data_by_date(budget_id: int, start_date: str, end_date: str) -> B
             category_items = category.category_items
             for category_item in category_items:
                 # Access the transactions relationship attribute to get the related transactions
-                statement = select(Transaction).where(
-                    Transaction.category_item_id == category_item.id,
-                    Transaction.transaction_date >= start_date,
-                    Transaction.transaction_date <= end_date,
-                )
-                result = session.exec(statement)
-                transactions = result.all()
+                transactions = []
+                for transaction in category_item.transactions:
+                    if transaction.transaction_date:
+                        # Convert transaction_date to datetime object
+                        transaction_date_dt = datetime.strptime(
+                            transaction.transaction_date, "%m/%d/%y"
+                        )
+                        if start_date_dt <= transaction_date_dt <= end_date_dt:
+                            transactions.append(transaction)
                 category_item.transactions = transactions
         return budget
 
@@ -307,7 +312,7 @@ def update_budget_by_id(
         budget = session.exec(select(Budget).where(Budget.id == budget_id)).first()
 
         budget.name = name
-        budget.updated = datetime.utcnow()
+        budget.updated = datetime.now(timezone.utc)
 
         session.add(budget)
         session.commit()
@@ -367,22 +372,30 @@ def get_category_data_by_date(
     """
     This function takes a category_id as an argument and returns a Category object with its related data.
     :param category_id: The id of the Category to retrieve.
+    :param start_date: The start date of the date range to filter transactions by.
+    :param end_date: The end date of the date range to filter transactions by.
     :return: A Category object with its related data.
     """
+    # Convert start_date and end_date to datetime objects
+    start_date_dt = datetime.strptime(start_date, "%m/%d/%y")
+    end_date_dt = datetime.strptime(end_date, "%m/%d/%y")
+
     with session:
         # Get the category with the given id
         category = session.get(Category, category_id)
-        # Access the categories relationship attribute to get the related category items
+        # Access the category_items relationship attribute to get the related category items
         category_items = category.category_items
         for category_item in category_items:
             # Access the transactions relationship attribute to get the related transactions
-            statement = select(Transaction).where(
-                Transaction.category_item_id == category_item.id,
-                Transaction.transaction_date >= start_date,
-                Transaction.transaction_date <= end_date,
-            )
-            result = session.exec(statement)
-            transactions = result.all()
+            transactions = []
+            for transaction in category_item.transactions:
+                if transaction.transaction_date:
+                    # Convert transaction_date to datetime object
+                    transaction_date_dt = datetime.strptime(
+                        transaction.transaction_date, "%m/%d/%y"
+                    )
+                    if start_date_dt <= transaction_date_dt <= end_date_dt:
+                        transactions.append(transaction)
             category_item.transactions = transactions
         return category
 
@@ -430,27 +443,36 @@ def get_all_transactions() -> List[Transaction]:
 
 def get_transactions_by_date(start_date: str, end_date: str) -> List[Transaction]:
     """
-    Retrieves a Budget object with the given budget_id from the database and filters its transactions to only include those with a transaction_date between start_date and end_date.
+    Retrieves transactions from the database and filters them to only include those with a transaction_date between start_date and end_date.
 
-    :param budget_id: The id of the budget to retrieve from the database.
-    :type budget_id: int
     :param start_date: The start date of the date range to filter transactions by.
     :type start_date: str
     :param end_date: The end date of the date range to filter transactions by.
     :type end_date: str
-    :return: A Budget object with filtered transactions.
-    :rtype: Budget
+    :return: A list of filtered transactions.
+    :rtype: List[Transaction]
     """
+    # Convert start_date and end_date to datetime objects
+    start_date_dt = datetime.strptime(start_date, "%m/%d/%y")
+    end_date_dt = datetime.strptime(end_date, "%m/%d/%y")
 
     with session:
         # Access the transactions relationship attribute to get the related transactions
-        statement = select(Transaction).where(
-            Transaction.transaction_date >= start_date,
-            Transaction.transaction_date <= end_date,
-        )
+        statement = select(Transaction)
         result = session.exec(statement)
         transactions = result.all()
-        return transactions
+
+        # Filter transactions by date range
+        filtered_transactions = [
+            transaction
+            for transaction in transactions
+            if transaction.transaction_date
+            and start_date_dt
+            <= datetime.strptime(transaction.transaction_date, "%m/%d/%y")
+            <= end_date_dt
+        ]
+
+        return filtered_transactions
 
 
 def get_transaction_by_id(transaction_id) -> Transaction:
@@ -474,7 +496,7 @@ def update_transaction_by_id(
         transaction.transaction_date = transaction_date
         transaction.amount = amount
         transaction.category_item_id = category_item_id
-        transaction.updated = datetime.utcnow()
+        transaction.updated = datetime.now(timezone.utc)
 
         session.add(transaction)
         session.commit()
@@ -557,7 +579,7 @@ def update_category_item_by_id(
         category_item.name = name
         category_item.category_id = category.id
         category_item.budgeted = budgeted_amount
-        category_item.updated = datetime.utcnow()
+        category_item.updated = datetime.now(timezone.utc)
 
         session.add(category_item)
         session.commit()
@@ -587,6 +609,14 @@ def create_transaction(
         category_item_name (ui.select): name of the category item that the transaction is under
         amount (ui.number): ztring representation of the dollar amount of the transaction
     """
+    # # Convert the transaction_date string to a datetime object
+    # try:
+    #     transaction_date_dt = datetime.strptime(transaction_date, "%m/%d/%y").replace(
+    #         tzinfo=timezone.utc
+    #     )
+    # except ValueError as e:
+    #     print(f"Error parsing date: {e}")
+    #     return
 
     with session:
         # category_item: CategoryItem = session.exec(
