@@ -35,20 +35,17 @@ with ui.tab_panels(tabs, value=budget_report).classes("w-full"):
         category.spending_breakdown_chart()
         category.category_treemap()
 
-# ui.run(
-#     native=True,
-#     window_size=(1200, 800),
-#     title="Budgeting App",
-#     favicon="assets\\budgeting.ico",
-#     fullscreen=False,
-#     reload=False,
-# )
-
 ui.run(
-    # native=True,
-    # window_size=(1200, 800),
+    native=True,
+    window_size=(1200, 800),
     title="Budgeting App",
     favicon="assets\\budgeting.ico",
-    # fullscreen=False,
-    # reload=False,
+    fullscreen=False,
+    reload=False,
 )
+
+#  For Development
+# ui.run(
+# title="Budgeting App",
+# favicon="assets\\budgeting.ico",
+# )

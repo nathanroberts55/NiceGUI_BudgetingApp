@@ -3,6 +3,7 @@ import pandas as pd
 import random
 from typing import List
 from datetime import datetime, timedelta, timezone
+from dateutil.parser import parse
 from utils import okay, warn, error, generate_random_float, parse_date, to_dict
 from sqlmodel import SQLModel, Session, create_engine, select, cast, DateTime
 from .budget_model import Budget
@@ -267,11 +268,15 @@ def get_budget_data_by_date(budget_id: int, start_date: str, end_date: str) -> B
                 for transaction in category_item.transactions:
                     if transaction.transaction_date:
                         # Convert transaction_date to datetime object
-                        transaction_date_dt = datetime.strptime(
-                            transaction.transaction_date, "%m/%d/%y"
-                        )
-                        if start_date_dt <= transaction_date_dt <= end_date_dt:
-                            transactions.append(transaction)
+                        try:
+                            # Convert transaction_date to datetime object
+                            transaction_date_dt = parse(transaction.transaction_date)
+                            if start_date_dt <= transaction_date_dt <= end_date_dt:
+                                transactions.append(transaction)
+                        except ValueError as e:
+                            print(
+                                f"Error parsing date: {transaction.transaction_date} - {e}"
+                            )
                 category_item.transactions = transactions
         return budget
 
@@ -391,11 +396,15 @@ def get_category_data_by_date(
             for transaction in category_item.transactions:
                 if transaction.transaction_date:
                     # Convert transaction_date to datetime object
-                    transaction_date_dt = datetime.strptime(
-                        transaction.transaction_date, "%m/%d/%y"
-                    )
-                    if start_date_dt <= transaction_date_dt <= end_date_dt:
-                        transactions.append(transaction)
+                    try:
+                        # Convert transaction_date to datetime object
+                        transaction_date_dt = parse(transaction.transaction_date)
+                        if start_date_dt <= transaction_date_dt <= end_date_dt:
+                            transactions.append(transaction)
+                    except ValueError as e:
+                        print(
+                            f"Error parsing date: {transaction.transaction_date} - {e}"
+                        )
             category_item.transactions = transactions
         return category
 
@@ -463,14 +472,16 @@ def get_transactions_by_date(start_date: str, end_date: str) -> List[Transaction
         transactions = result.all()
 
         # Filter transactions by date range
-        filtered_transactions = [
-            transaction
-            for transaction in transactions
-            if transaction.transaction_date
-            and start_date_dt
-            <= datetime.strptime(transaction.transaction_date, "%m/%d/%y")
-            <= end_date_dt
-        ]
+        filtered_transactions = []
+        for transaction in transactions:
+            if transaction.transaction_date:
+                try:
+                    # Convert transaction_date to datetime object
+                    transaction_date_dt = parse(transaction.transaction_date)
+                    if start_date_dt <= transaction_date_dt <= end_date_dt:
+                        filtered_transactions.append(transaction)
+                except ValueError as e:
+                    print(f"Error parsing date: {transaction.transaction_date} - {e}")
 
         return filtered_transactions
 
